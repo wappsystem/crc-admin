@@ -1,0 +1,94 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",Prg<br>No|Research_Program_uid,Program|Research_Program,OP<br>No|Output_uid,Output ID|Output,Theme<br>No|Theme_uid,Theme ID|Theme,MS<br>No|UID,Milestone ID|Milestone_ID,Milestone|Milestone,_Progress,Delivery Date|Milestone_Delivery_Date,Active|isActive";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var program_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_milestones'].Research_Program;
+        var output_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_milestones'].Output;
+        var theme_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_milestones'].Theme;
+        //-------------------------------------
+        $("#title__ID").text('Commonwealth Milestones');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){  _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){  _set_req(); _request_data(); })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Research_Program_uid':
+                case 'Output_uid':
+                case 'Theme_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Milestone_Delivery_Date':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+                case 'Research_Program':
+                    var sql="with tb as (select name=@('Research_Program_name'),value2=uid from [TABLE-"+program_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Output':
+                    var sql="with tb as (select name=@('Research_Program_Output_ID'),value2=uid from [TABLE-"+output_pid+"] where PUID="+records[I].Research_Program_uid+")";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Theme':
+                    var sql="with tb as (select name=@('Theme_name'),value2=uid from [TABLE-"+theme_pid+"] where PUID="+records[I].Research_Program_uid+")";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case '_Progress':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].UID===undefined) return;
+                    var html="<u style='cursor:pointer'>Progress..</u>";
+                    td.html(html);
+                    td.find('u').on('click',function(){
+                        $vm.load_module_by_name('wappsystem_crc_backoffice_commonwealth_milestone_milestones_progress',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID,ms_id:records[I].Milestone_ID});
+                    })
+                break;
+                case 'isActive':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >No</option>\
+                    <option >Yes</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+            }
+        }
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Research_Program':
+                case 'Output':
+                case 'Theme':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+    		if(record.Milestone_Delivery_Date!=='') dbv.DT1=record.Milestone_Delivery_Date;
+            dbv.S2=record.Milestone_ID;
+    		dbv.V1=0; if(record.Research_Program_uid!=='') dbv.V1=parseInt(record.Research_Program_uid);
+            dbv.V2=0; if(record.Output_uid!=='' ) dbv.V2=parseInt(record.Output_uid);
+            dbv.V3=0; if(record.Theme_uid!=='' ) dbv.V3=parseInt(record.Theme_uid);
+        return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+</style>

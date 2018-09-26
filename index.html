@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <meta name="description" content="Woolcock">
+        <link rel="icon" href="data:,">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.css" />
+    </head>
+    <body>
+        <div id=header class=vm-header></div>
+        <div id=content><div id=vm_loader class="loader_0"></div></div>
+        <div id=footer></div>
+        <div id=components style='display:none'>
+            <div id=c_header>
+                <div class=vm-mobile>
+                    <span id=vm-mobile_title class=vm-mobile-title>CRC Admin</span>
+                    <a id="vm-hamburger_button" class=vm-hamburger-button onclick="$vm.toggle()"><i class="fa fa-bars"></i></a>
+                </div>
+                <div class=vm-desk-logo>
+                    <div id=vm-logo-image></div>
+                </div>
+                <div menu id="vm-menu">
+                    <a href="?/home"><i class="fa fa-home"></i> Home</a>
+                    <a href="?/link1">Project Management Data Entry</a>
+                    <a href="?/link2">Project Management Reports</a>
+                    <a href="?/link3">Board Meetings</a>
+                    <a id=vm_signin onclick="$vm.nav_wappsystem_signin();"><i class="fa fa-user"></i> Sign In</a>
+                    <a id=vm_signout class=vm-hide onclick=$vm.nav_signout()><i class="fa fa-user"></i> Sign Out</a>
+                </div>
+            </div>
+            <div id=c_footer>
+                <span id=text_0></span>
+            </div>
+        </div>
+    </body>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.2.1.min.js"></script>
+    <script main>
+        //------------------------------------
+        $vm={};$VmAPI={};$vm.ver=[1.00,1.00];
+        $vm.start_time=new Date().getTime();
+        $vm.api_path_development="https://cbs.wappsystem.com/dev/";
+        $vm.api_path_production="https://cbs.wappsystem.com/pro/";
+        $vm.default_production="No";
+        $vm.qid='10000000';
+        $vm.vm_router=undefined;
+        if(window.location.hostname=='127.0.0.1' || window.location.hostname=='localhost') $vm.localhost=true;
+        //------------------------------------
+        $vm.module_links=[
+            //"https://crc-admin.wappsystem.com.au/modules.json",
+        ];
+        $vm.module_list={
+            "home":   {"url":"https://crc-admin.wappsystem.com.au/modules/home.html"},
+            "link1":  {"url":"https://crc-admin.wappsystem.com.au/modules/navigation/navigation_data_entry.html"},
+            "link2":  {"url":"https://crc-admin.wappsystem.com.au/modules/navigation/navigation_reports.html"},
+            "link3":  {"url":"https://crc-admin.wappsystem.com.au/modules/navigation/navigation_board.html"},
+
+            "wappsystem_crc_backoffice_board_agenda": {table_id:'20000466',url:'https://crc-admin.wappsystem.com.au/modules/board/agendas_nav.html'},
+            "wappsystem_crc_backoffice_board_agendas": {table_id:'20000455',url:'https://crc-admin.wappsystem.com.au/modules/board/agenda.html'},
+            "wappsystem_crc_backoffice_board_construct_agenda":{table_id:'20000466',url:'https://crc-admin.wappsystem.com.au/modules/board/construct_agenda.html'},
+            "wappsystem_crc_backoffice_board_construct_agenda_items":{table_id:'20000455',url:'https://crc-admin.wappsystem.com.au/modules/board/agenda_items.html',action_type:'20000456'},
+            "wappsystem_crc_backoffice_board_action_type":{table_id:'20000456',url:'https://crc-admin.wappsystem.com.au/modules/board/action_type.html'},
+
+
+
+            "wappsystem_crc_backoffice_reports_participant":{table_id:'20003941',url:'https://crc-admin.wappsystem.com.au/modules/participant/participant.html'},//,form_module:'wappsystem_crc_backoffice_participant_form'},
+            "wappsystem_crc_backoffice_reports_participant_contact_details":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/participant_details.html'},//,form_module:'wappsystem_crc_backoffice_participant_form'},
+
+            "wappsystem_crc_backoffice_reports_cash_contribution":{table_id:'20004767',url:'https://crc-admin.wappsystem.com.au/modules/reports/cash.html',Site:'20007829',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_cash_agreement":{table_id:'20004706',url:'https://crc-admin.wappsystem.com.au/modules/reports/cash_agreement.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_staff_inkind":{table_id:'20004766',url:'https://crc-admin.wappsystem.com.au/modules/reports/staff_inkind.html',Project:'20003921',Participant:'20003941',Staff:'20004600',Rate:'20004763'},
+            "wappsystem_crc_backoffice_reports_staff_inkind_agreement":{table_id:'20004761',url:'https://crc-admin.wappsystem.com.au/modules/reports/staff_inkind_agreement.html',Project:'20003921',Participant:'20003941',Rate:'20004763'},
+            "wappsystem_crc_backoffice_reports_staff_inkind_full":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/staff_inkind_full.html',inkind:'20004766',inkind_agreement:'20004761',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_staff_inkind_total":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/staff_inkind_total.html',inkind:'20004766',inkind_agreement:'20004761',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_cash_full":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/cash_full.html',cash:'20004767',cash_agreement:'20004706',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_cash_total":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/cash_total.html',cash:'20004767',cash_agreement:'20004706',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_project_shares":{table_id:'20009721',url:'https://crc-admin.wappsystem.com.au/modules/reports/project_shares.report.html',Participant:'20003941',Project:'20003921',cash:'20004767',equipment:'20008274',office:'20004776',Staff:'20004766',Participant_project:'20007811',flow_through:'20011489'},
+            "wappsystem_crc_backoffice_reports_staff_inkind":{table_id:'20009721',url:'https://crc-admin.wappsystem.com.au/modules/reports/staff_inkind_actual.report.html'},
+            "wappsystem_crc_backoffice_reports_cash":{table_id:'20009722',url:'https://crc-admin.wappsystem.com.au/modules/reports/cash_summary.report.html'},
+            "wappsystem_crc_backoffice_reports_other":{table_id:'20009723',url:'https://crc-admin.wappsystem.com.au/modules/reports/other_summary.report.html'},
+            "wappsystem_crc_backoffice_reports_equipment":{table_id:'20009724',url:'https://crc-admin.wappsystem.com.au/modules/reports/equipment_summary.report.html'},
+            "wappsystem_crc_backoffice_report_participant_project":{table_id:'20007811',url:'https://crc-admin.wappsystem.com.au/modules/participant/project.html'},//,form_module:'wappsystem_crc_backoffice_paticipant_project_form'},
+            "wappsystem_crc_backoffice_reports_participant_project_contributiont":{table_id:'20009722',url:'https://crc-admin.wappsystem.com.au/modules/reports/project_shares_participant.report.html',Participant:'20003941',Project:'20003921',cash:'20004767',equipment:'20008274',office:'20004776',Staff:'20004766',Participant_project:'20007811',flow_through:'20011489'},
+            "wappsystem_crc_backoffice_reports_participant_project_sign_off":{table_id:'20007811',url:'https://crc-admin.wappsystem.com.au/modules/reports/project_sign_off.html',Participant:'20003941',Project:'20003921',Participant_project:'20007811'},
+
+            "wappsystem_crc_backoffice_reports_non_staff_inkind_equipment":{table_id:'20008274',url:'https://crc-admin.wappsystem.com.au/modules/reports/non_staff_inkind_equipment.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_non_staff_inkind_office_space":{table_id:'20004776',url:'https://crc-admin.wappsystem.com.au/modules/reports/non_staff_inkind_office_space.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_non_staff_inkind_other":{table_id:'20004776',url:'https://crc-admin.wappsystem.com.au/modules/reports/non_staff_inkind_other.html',Project:'20003921',Participant:'20003941',item:'20004855'},
+            "wappsystem_crc_backoffice_reports_non_staff_inkind_agreement":{table_id:'20004760',url:'https://crc-admin.wappsystem.com.au/modules/reports/non_staff_inkind_agreement.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_non_staff_inkind_total":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/non_staff_inkind_total.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_reports_non_staff_inkind_full":{table_id:'20010706',url:'https://crc-admin.wappsystem.com.au/modules/reports/non_staff_inkind_full.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_commonwealth_milestone_programmes":{table_id:'20004861',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/programmes.html',Staff:'20004600',Participant:'20003941'},
+            "wappsystem_crc_backoffice_commonwealth_milestone_programme_output":{table_id:'20004862',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/programmes_output.html',Programmes:'20004861'},
+            "wappsystem_crc_backoffice_commonwealth_milestone_themes":{table_id:'20005232',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/programmes_themes.html',Staff:'20004600',Participant:'20003941',Programmes:'20004861'},
+            "wappsystem_crc_backoffice_commonwealth_milestone_milestones":{table_id:'20004605',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/milestones.html',Output:'20004862',Theme:'20005232',Research_Program:'20004861'},
+            "wappsystem_crc_backoffice_commonwealth_milestone_milestones_progress":{table_id:'20007723',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/milestones_progress.html',Project:'20003921',Participant:'20003941'},
+
+            "wappsystem_crc_backoffice_reports_updates_project_milestones":{table_id:'20003942',url:'https://crc-admin.wappsystem.com.au/modules/reports/project_milestone.html'},
+            "wappsystem_crc_backoffice_reports_updates_project_deliverables":{table_id:'20009287',url:'https://crc-admin.wappsystem.com.au/modules/reports/project_deliverables.html'},
+            "wappsystem_crc_backoffice_reports_updates_commonwealth_milestones":{table_id:'20009547',url:'https://crc-admin.wappsystem.com.au/modules/reports/commonwealth_milestones.html'},
+
+            "wappsystem_crc_backoffice_reports_activity":{table_id:'20003942',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity.html'},
+            "wappsystem_crc_backoffice_reports_activity_project":{table_id:'20003921',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_project.html'},
+            "wappsystem_crc_backoffice_reports_activity_project_milestones":{table_id:'20003942',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_project_milestone.html'},
+            "wappsystem_crc_backoffice_reports_activity_project_milestones_update":{table_id:'20003942',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_project_milestone_update.html'},
+            "wappsystem_crc_backoffice_reports_activity_project_deliverables":{table_id:'20009287',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_project_deliverables.html'},
+            "wappsystem_crc_backoffice_reports_activity_commonwealth_milestones":{table_id:'20009547',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_commonwealth_milestones.html'},
+            "wappsystem_crc_backoffice_reports_activity_research_program":{table_id:'20004861',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_research_program.html'},
+            "wappsystem_crc_backoffice_reports_activity_support_queries":{table_id:'20010704',url:'https://crc-admin.wappsystem.com.au/modules/reports/activity_support_queries.html'},
+
+            "wappsystem_crc_backoffice_students":{table_id:'20005330',url:'https://crc-admin.wappsystem.com.au/modules/students/student.html'},
+            "wappsystem_crc_backoffice_students_documents":{table_id:'20005331',url:'https://crc-admin.wappsystem.com.au/modules/students/documents.html',Students:'20005330'},
+            "wappsystem_crc_backoffice_participant_setup":{table_id:'20007829',url:'https://crc-admin.wappsystem.com.au/modules/setup/participant_setup.html',Participant:'20003941'},
+
+
+
+
+
+
+
+
+            "wappsystem_crc_backoffice_staff":        {table_id:'20004600',url:'https://crc-admin.wappsystem.com.au/modules/staff/staff.html'},//,form_module:'wappsystem_crc_backoffice_staff_form'},
+            "wappsystem_crc_backoffice_staff_form":   {table_id:'20004600',url:'https://crc-admin.wappsystem.com.au/modules/staff/staff.form.html'},
+
+            "wappsystem_crc_backoffice_participant_project":        {table_id:'20007811',url:'https://crc-admin.wappsystem.com.au/modules/participant/project.html',Stream:'20004598'},//,form_module:'wappsystem_crc_backoffice_paticipant_project_form'},
+            "wappsystem_crc_backoffice_paticipant_project_form":   {table_id:'20007811',url:'https://crc-admin.wappsystem.com.au/modules/participant/project.form.html',Stream:'20004598'},
+
+            "wappsystem_crc_backoffice_participant":      {table_id:'20003941',url:'https://crc-admin.wappsystem.com.au/modules/participant/participant.html'},//,form_module:'wappsystem_crc_backoffice_participant_form'},
+            "wappsystem_crc_backoffice_participant_form": {table_id:'20003941',url:'https://crc-admin.wappsystem.com.au/modules/participant/participant.form.html'},
+
+            "wappsystem_crc_backoffice_agreement_commonwealth":{table_id:'20005489',url:'https://crc-admin.wappsystem.com.au/modules/agreement/commonwealth.html'},
+            "wappsystem_crc_backoffice_agreement_essential_participant":{table_id:'20004888',url:'https://crc-admin.wappsystem.com.au/modules/agreement/essential_participant.html'},
+            "wappsystem_crc_backoffice_agreement_other_participant":{table_id:'20005490',url:'https://crc-admin.wappsystem.com.au/modules/agreement/other_participant.html'},
+
+            "wappsystem_crc_backoffice_project_project":{table_id:'20003921',url:'https://crc-admin.wappsystem.com.au/modules/project/project.html',block:'2001075'},
+            "wappsystem_crc_backoffice_project_stream":{table_id:'20004598',url:'https://crc-admin.wappsystem.com.au/modules/project/stream.html'},
+            "wappsystem_crc_backoffice_project_agreement":{table_id:'20007719',url:'https://crc-admin.wappsystem.com.au/modules/project/agreement.html',Project:'20003921',Section:'20007720',Stream:'20004598'},
+            "wappsystem_crc_backoffice_project_investigator":{table_id:'20007658',url:'https://crc-admin.wappsystem.com.au/modules/project/investigator.html',Project:'20003921',Staff:'20004600',Stream:'20004598',Participant:'20003941'},
+            "wappsystem_crc_backoffice_project_investigator_site_investigator":{table_id:'20007810',url:'https://crc-admin.wappsystem.com.au/modules/project/site_investigator.html',Participant:'20003941',Staff:'20004600'},
+            "wappsystem_crc_backoffice_project_leader":{table_id:'20007659',url:'https://crc-admin.wappsystem.com.au/modules/project/leader.html',Project:'20003921',Staff:'20004600',Stream:'20004598',Participant:'20003941'},
+            "wappsystem_crc_backoffice_project_milestone":{table_id:'20003942',url:'https://crc-admin.wappsystem.com.au/modules/project/milestone.html',Project:'20003921',Stream:'20004598',Updates:'20009286',form_module:'wappsystem_crc_backoffice_project_milestone_form'},
+            "wappsystem_crc_backoffice_project_milestone_form":{table_id:'20003942',url:'https://crc-admin.wappsystem.com.au/modules/project/milestone.form.html',Project:'20003921',Stream:'20004598',Updates:'20009286'},
+            "wappsystem_crc_backoffice_project_deliverables":{table_id:'20009287',url:'https://crc-admin.wappsystem.com.au/modules/project/deliverables.html',Project:'20003921',Stream:'20004598'},//,form_module:'_wappsystem_crc_backoffice_project_deliverables_form'},
+            //"_wappsystem_crc_backoffice_project_deliverables_form":{table_id:'20009287',url:'https://crc-admin.wappsystem.com.au/modules/project/deliverables.form.html',Project:'20003921',Stream:'20004598',Deliverables:'20009287',Updates:'20009697'},
+
+            "wappsystem_crc_backoffice_contribution_cash":{table_id:'20004767',url:'https://crc-admin.wappsystem.com.au/modules/contribution/cash.html',Site:'20007829',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_cash_import":{table_id:'20004767',url:'https://crc-admin.wappsystem.com.au/modules/contribution/cash_import.html',Site:'20007829',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_cash_agreement":{table_id:'20004706',url:'https://crc-admin.wappsystem.com.au/modules/contribution/cash_agreement.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_staff_inkind":{table_id:'20004766',url:'https://crc-admin.wappsystem.com.au/modules/contribution/staff_inkind.html',Project:'20003921',Participant:'20003941',Staff:'20004600',Rate:'20004763'},
+            "wappsystem_crc_backoffice_contribution_staff_inkind_import":{table_id:'20004766',url:'https://crc-admin.wappsystem.com.au/modules/contribution/staff_inkind_import.html',Project:'20003921',Participant:'20003941',Staff:'20004600',Rate:'20004763'},
+            "wappsystem_crc_backoffice_contribution_staff_inkind_agreement":{table_id:'20004761',url:'https://crc-admin.wappsystem.com.au/modules/contribution/staff_inkind_agreement.html',Project:'20003921',Participant:'20003941',Rate:'20004763'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_equipment":{table_id:'20008274',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_equipment.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_equipment_import":{table_id:'20008274',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_equipment_import.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_office_space":{table_id:'20004776',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_office_space.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_office_space_import":{table_id:'20004776',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_office_space_import.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_other":{table_id:'20004776',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_other.html',Project:'20003921',Participant:'20003941',item:'20004855'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_other_import":{table_id:'20004776',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_other_import.html',Project:'20003921',Participant:'20003941',item:'20004855'},
+            "wappsystem_crc_backoffice_contribution_non_staff_inkind_agreement":{table_id:'20004760',url:'https://crc-admin.wappsystem.com.au/modules/contribution/non_staff_inkind_agreement.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_flow_through":{table_id:'20011489',url:'https://crc-admin.wappsystem.com.au/modules/contribution/flow_through.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_flow_through_export":{table_id:'20009721',url:'https://crc-admin.wappsystem.com.au/modules/contribution/flow_through_export.html',Participant:'20003941',Project:'20003921',cash:'20004767',equipment:'20008274',office:'20004776',Staff:'20004766',Participant_project:'20007811',flow_through:'20011489'},
+            "wappsystem_crc_backoffice_contribution_flow_through_import":{table_id:'20011489',url:'https://crc-admin.wappsystem.com.au/modules/contribution/flow_through_import.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_flow_through_check":{table_id:'20009721',url:'https://crc-admin.wappsystem.com.au/modules/contribution/flow_through_check.html',Participant:'20003941',Project:'20003921',cash:'20004767',equipment:'20008274',office:'20004776',Staff:'20004766',Participant_project:'20007811',flow_through:'20011489'},
+            "wappsystem_crc_backoffice_contribution_staff_inkind_summary":{table_id:'20009721',url:'https://crc-admin.wappsystem.com.au/modules/reports/staff_inkind_actual.bi.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_cash_summary":{table_id:'20009722',url:'https://crc-admin.wappsystem.com.au/modules/reports/cash_summary.bi.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_other_summary":{table_id:'20009723',url:'https://crc-admin.wappsystem.com.au/modules/reports/other_summary.bi.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_contribution_equiment_summary":{table_id:'20009724',url:'https://crc-admin.wappsystem.com.au/modules/reports/equipment_summary.bi.html',Project:'20003921',Participant:'20003941'},
+
+
+            "wappsystem_crc_backoffice_commonwealth_milestone_programmes":{table_id:'20004861',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/programmes.html',Staff:'20004600',Participant:'20003941'},
+            //"wappsystem_crc_backoffice_commonwealth_milestone_programme_output":{table_id:'20004862',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/programmes_output.html',Programmes:'20004861'},
+            //"wappsystem_crc_backoffice_commonwealth_milestone_themes":{table_id:'20005232',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/programmes_themes.html',Staff:'20004600',Participant:'20003941',Programmes:'20004861'},
+            //"wappsystem_crc_backoffice_commonwealth_milestone_milestones":{table_id:'20004605',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/milestones.html',Output:'20004862',Theme:'20005232',Research_Program:'20004861'},
+            //"wappsystem_crc_backoffice_commonwealth_milestone_milestones_progress":{table_id:'20007723',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/milestones_progress.html',Project:'20003921',Participant:'20003941'},
+            "wappsystem_crc_backoffice_commonwealth_milestone_milestones_new":{table_id:'20009547',url:'https://crc-admin.wappsystem.com.au/modules/commonwealth/milestones_new.html',Research_Program:'20004861'},
+
+
+            "wappsystem_crc_backoffice_resources_express_of_interest":{table_id:'20010667',url:'https://crc-admin.wappsystem.com.au/modules/resources/express_of_interest.html'},
+            "wappsystem_crc_backoffice_resources_conflict_of_interests":{table_id:'20010668',url:'https://crc-admin.wappsystem.com.au/modules/resources/conflict_of_interests.html'},
+            "wappsystem_crc_backoffice_resources_publications":{table_id:'20010669',url:'https://crc-admin.wappsystem.com.au/modules/resources/publications.html'},
+            "wappsystem_crc_backoffice_resources_travel_policy":{table_id:'20010670',url:'https://crc-admin.wappsystem.com.au/modules/resources/travel_policy.html'},
+            "wappsystem_crc_backoffice_resources_expenses_report_template":{table_id:'20010671',url:'https://crc-admin.wappsystem.com.au/modules/resources/expenses_report_template.html'},
+            "wappsystem_crc_backoffice_resources_student_scholarship_application":{table_id:'20010694',url:'https://crc-admin.wappsystem.com.au/modules/resources/student_scholarship_application.html'},
+            "wappsystem_crc_backoffice_resources_style_guide":{table_id:'20010695',url:'https://crc-admin.wappsystem.com.au/modules/resources/style_guide.html'},
+            "wappsystem_crc_backoffice_resources_powerpoint_template":{table_id:'20010696',url:'https://crc-admin.wappsystem.com.au/modules/resources/powerpoint_template.html'},
+            "wappsystem_crc_backoffice_resources_data_release_request":{table_id:'20011343',url:'https://crc-admin.wappsystem.com.au/modules/resources/data_release_request.html'},
+            "wappsystem_crc_backoffice_reports_financial_performance":{table_id:'20011460',url:'https://crc-admin.wappsystem.com.au/modules/report/financial_performance.html'},
+            "wappsystem_crc_backoffice_reports_financial_position":{table_id:'20011461',url:'https://crc-admin.wappsystem.com.au/modules/report/financial_position.html'},
+            "wappsystem_crc_backoffice_reports_cash_flow":{table_id:'20011462',url:'https://crc-admin.wappsystem.com.au/modules/report/cash_flow.html'},
+            "wappsystem_crc_backoffice_reports_cash_contribution":{table_id:'20011463',url:'https://crc-admin.wappsystem.com.au/modules/report/cash_contribution.html'},
+            "wappsystem_crc_backoffice_user_guide":{table_id:'20010673',url:'https://crc-admin.wappsystem.com.au/modules/resources/user_guide.html'},
+            "wappsystem_crc_backoffice_cm_user_guide":{table_id:'20010726',url:'https://crc-admin.wappsystem.com.au/modules/resources/user_guide.html'},
+            "wappsystem_crc_backoffice_pm_user_guide":{table_id:'20010727',url:'https://crc-admin.wappsystem.com.au/modules/resources/user_guide.html'},
+            "wappsystem_crc_backoffice_pd_user_guide":{table_id:'20010728',url:'https://crc-admin.wappsystem.com.au/modules/resources/user_guide.html'},
+            "wappsystem_crc_backoffice_queries":{table_id:'20010704',url:'https://crc-admin.wappsystem.com.au/modules/resources/queries.html'},
+
+            "wappsystem_crc_backoffice_students":{table_id:'20005330',url:'https://crc-admin.wappsystem.com.au/modules/students/student.html',Project:'20003921'},
+            "wappsystem_crc_backoffice_events":{table_id:'20010427',url:'https://crc-admin.wappsystem.com.au/modules/students/events.html'},
+            "wappsystem_crc_backoffice_students_documents":{table_id:'20005331',url:'https://crc-admin.wappsystem.com.au/modules/students/documents.html',Students:'20005330'},
+            "wappsystem_crc_backoffice_participant_setup":{table_id:'20007829',url:'https://crc-admin.wappsystem.com.au/modules/setup/participant_setup.html',Participant:'20003941'},
+            "wappsystem_crc_backoffice_user_program_setup":{table_id:'20010700',url:'https://crc-admin.wappsystem.com.au/modules/setup/program_setup.html',Program:'20004861'},
+            "wappsystem_crc_backoffice_user_project_setup":{table_id:'20010701',url:'https://crc-admin.wappsystem.com.au/modules/setup/project_setup.html',Project:'20003921'},
+            "wappsystem_crc_backoffice_user_user_login_list":{table_id:'20010705',url:'https://crc-admin.wappsystem.com.au/modules/setup/user_login_list.html',Participant:'20003941'},
+            "wappsystem_crc_backoffice_other_item_list":{table_id:'20004855',url:'https://crc-admin.wappsystem.com.au/modules/setup/item_list.html'},
+            "wappsystem_crc_backoffice_other_section":{table_id:'20007720',url:'https://crc-admin.wappsystem.com.au/modules/setup/section_list.html'},
+
+
+
+
+
+        }
+        //------------------------------------
+        $vm.local_url=function(url){
+            var urlR=url;
+            if($vm.localhost==true){
+                urlR=urlR.replace('https://crc-admin.wappsystem.com.au/','http://127.0.0.1:8000/wappsystem/crc-admin/');
+            }
+            return urlR;
+        }
+        //------------------------------------
+        for(p in $vm.module_links) $vm.module_links[p]=$vm.local_url($vm.module_links[p]);
+        for(p in $vm.module_list) $vm.module_list[p].url=$vm.local_url($vm.module_list[p].url);
+        //------------------------------------
+        $vm.default_title="Alertness CRC Ltd";
+        $('#text_0').html("Copyright &copy; "+(new Date()).getFullYear()+", Alertness CRC Ltd");
+        //------------------------------------
+        $('#c_header').contents().appendTo('#header');
+        $('#c_footer').contents().appendTo('#footer');
+        //------------------------------------
+        $('#vm-mobile_title').on('click',function(){ $vm.load_module_v2('home',$vm.root_layout_content_slot,{}) })
+        $('.vm-desk-logo').on('click',function(){ $vm.load_module_v2('home',$vm.root_layout_content_slot,{}) })
+        //------------------------------------
+        $vm.root_layout_content_slot='content'
+        $vm.root_layout_footer='footer';
+        //---------------------------------------------
+        var set_height=function(){
+            var header_height=$('#header').outerHeight(); $vm.header_height=header_height;
+            var footer_height=$('#footer').outerHeight(); $vm.footer_height=footer_height;
+            $vm.min_height=($(window).height()-header_height-footer_height);
+            if($vm.active_id!=undefined){
+                $('#D'+$vm.active_id).css('height',($('body').height()-$('#header').outerHeight()-$('#footer').outerHeight())+"px");
+            }
+        }
+        //------------------------------------
+        set_height();
+        //-----------------------------------------
+        $vm.start=function(){
+
+
+            $vm.url=function(text){
+                //replace some text in old modules to the correct ones
+                var re1=new RegExp('__BASE__/vmiis/Common-Code/', 'g');   text=text.replace(re1,'https://component.vmiis.com/');
+                text=text.replace(/__HOST__\//g,$vm.hosting_path+'/');
+                text=text.replace(/__VER__/g,$vm.ver[0]);
+                text=text.replace(/__PARTS__\//g,'__COMPONENT__/');
+                text=text.replace(/__COMPONENT__\//g,'https://component.vmiis.com/');
+                if(window.location.toString().indexOf('_d=1')!=-1){
+                    //use local system files
+                    var host=window.location.protocol+'//'+window.location.host;
+                    text=text.replace(/https:\/\/api.vmiis.com/g,host+'/vmiis/api-2');
+                    text=text.replace(/https:\/\/framework.vmiis.com/g,host+'/vmiis/framework-2');
+                    text=text.replace(/https:\/\/component.vmiis.com/g,host+'/vmiis/component-2');
+                }
+                return text;
+            }
+            //---------------------------------------------
+
+
+
+            $vm.init_v3({callback:function(){
+               $vm.init_status=1;
+               $vm.show_user();
+           }})
+        }
+        //------------------------------------
+        $vm.menu_click=function(href){
+            href=href.replace('?\/','');
+            href=href.replace(/\//g,'_');
+            $vm.load_module_v2(href,$vm.root_layout_content_slot,{});
+        }
+        //------------------------------------
+        $vm.show=function(id){
+            $vm.active_id=id;
+            document.title=$vm.default_title;
+            $("meta[name='description']").attr("content", "Alertness CRC Ltd");
+            $("body").removeClass();
+            $("body").addClass('body_background_default');
+            if(id!=undefined && $vm.vm[id]!=undefined && $vm.vm[id].show!=undefined) $vm.vm[id].show();
+            if(id!=undefined){
+                $('#D'+id).css('overflow','auto');
+                $('#D'+id).css('min-height','unset');
+                $('#D'+id).css('height',($('body').height()-$('#header').outerHeight()-$('#footer').outerHeight())+"px");
+            }
+        }
+        //------------------------------------
+        $vm.show();
+        window.onresize=function(){set_height();}
+        //------------------------------------
+    </script>
+    <style main>
+        :root {
+            --menu-color: #000;
+            --menu-hover-color: #29eca6;
+            --menu-hover-background-color: #555;
+
+            --dropdown-menu-color:#666;
+            --dropdown-menu-background-color:#f9f9f9;
+            --dropdown-menu-hover-color:#555;
+            --dropdown-menu-hover-background-color:#ddd;
+            --dropdown-menu-border-color:#ddd;
+
+            --mobile-title-color:#000;
+            --mobile-hamburger-color:#000;
+            --mobile-menu-background-color:#1c3144;
+            --mobile-break-point:700px;
+        }
+        html,body{ margin:0; padding:0; height:100%; font-family:Arial;}
+        body{background-size: cover; background-repeat: repeat-x; background-position: center top; background-attachment: fixed;}
+        /*.body_background_default{ background-image: url(https://image.vmiis.com/bk014.jpg); }*/
+        #vm-logo-image{
+            margin-top: -32px;
+            width:300px;
+            height:94px;
+            background: url('http://images.wappsystem.com.au/crcbanner.png') no-repeat top center;
+            background-size: cover;
+            float:left;
+        }
+        #content{
+        }
+        #vm-logo-label-A{
+            font-family: Arial, sans-serif;
+            color:#fff;
+            font-size: 200%;
+            line-height:10px;
+            display:inline-block;
+        }
+        #vm-logo-label-B{
+            font-family: Arial, sans-serif;
+            color:#fff;
+            font-size: 93%;
+            line-height:80%;
+            display:inline-block;
+        }
+        #footer{
+            height:24px;
+            color: #fff;
+            padding: 3px;
+            background-color: #333;
+            font:80%/18px arial;
+            text-align: center;
+        }
+        /*----------------------*/
+        .vm-header{height:100px;background:rgba(255,255,255,1);}
+        .vm-desk-logo{ display:inline-block;float:left;padding:36px 30px 0 30px;cursor:pointer;}
+        #vm-menu{ float:left;padding:50px 30px 0 30px;}
+        @media screen and (max-width: 1100px){
+            .vm-header{height:50px;}
+            .vm-desk-logo{display:none;}
+            #vm-menu{padding:0;}
+        }
+        /*----------------------*/
+    </style>
+    <script menu>
+        //------------------------------------
+        $('.vm-dropdown').on('click',function(e){
+            var d=$(this).find('.vm-dropdown-content');
+            if(d.css('display')=='block') d.css('display','none');
+            else d.css('display','block');
+        })
+        $(".vm-dropdown").mouseleave(function (){  $(".vm-dropdown-content").hide();  })
+        $(".vm-dropdown-content").mouseleave(function (){  $(this).hide();  })
+        $vm.toggle=function() {
+            var x = document.getElementById("vm-menu");
+            if(x.className==='') x.className="responsive";
+            else x.className="";
+        }
+        //------------------------------------
+        $('#vm-menu a').on('click',function(e){
+            e.preventDefault();
+            var href=$(this).attr('href');
+            if(href!=undefined && href!=''){
+                if($vm.menu_click!=undefined) $vm.menu_click(href);
+            }
+            $vm.toggle();
+        })
+        //------------------------------------
+        $vm.menu_click=function(href){
+            href=href.replace('?\/','');
+            href=href.replace(/\//g,'_');
+            $vm.load_module_v2(href,$vm.root_layout_content_slot,{});
+        }
+        //------------------------------------
+    </script>
+    <style menu>
+        /*menu*/
+        #vm-menu {
+            overflow: hidden;
+            display:inline-block;
+            float:left;
+        }
+        #vm-menu > a {
+            color:var(--menu-color);
+            float: left;
+            display: block;
+            text-align: center;
+            padding: 10px 8px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor:pointer;
+        }
+        .vm-dropbtn {
+            color:var(--menu-color);
+            display: block;
+            font-size: 14px;
+            padding: 10px 8px;
+            background-color: inherit;
+            font-family: inherit;
+            cursor:pointer;
+        }
+        .vm-dropdown {
+            color:var(--menu-color);
+            float: left;
+            overflow: hidden;
+            border: none;
+            outline: none;
+            background-color: inherit;
+            font-family: inherit;
+            margin: 0;
+        }
+        .vm-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--dropdown-menu-background-color);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            max-height: 1000px;
+            overflow-y: hidden;
+            border-radius: 0px 3px 3px 3px;
+            animation: vm-menu-show 1.8s;
+        }
+        .vm-dropdown-content a {
+            float: none;
+            font-size: 14px;
+            color: var(--dropdown-menu-color)!important;
+            padding: 3px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            cursor:pointer;
+            border-bottom:1px solid var(--dropdown-menu-border-color);
+        }
+        #vm-menu > a:hover, .vm-dropdown:hover .vm-dropbtn {
+          background-color:var(--menu-hover-background-color);
+          color:var(--menu-hover-color);
+          border-radius:4px;
+        }
+        .vm-dropdown-content a:hover {
+            background-color: var(--dropdown-menu-hover-background-color);
+            color: var(--dropdown-menu-hover-color);
+            text-decoration: none;
+        }
+        .vm-hide{
+            display:none!Important;
+        }
+        .vm-mobile{
+            display:none;
+        }
+        /*----------------------*/
+        @media screen and (max-width: 1100px) {
+            .vm-mobile{
+                display:block;
+            }
+            .vm-mobile-title{
+                color:var(--mobile-title-color);
+                font-size: 28px;
+                display:inline-block;
+                padding: 3px 0 3px 12px;
+                cursor: pointer;
+            }
+            #vm-hamburger_button{
+                float: right;
+                display: block;
+                font-size:28px;
+                padding:5px 16px 3px 16px;
+                position: absolute;
+                right: 0;
+                top: 0;
+                cursor:pointer;
+                color:var(--mobile-hamburger-color);
+            }
+            #vm-menu {
+                width:100%;
+                margin-top:0px;
+                margin-right:0px;
+                margin-left:0px;
+                padding-left:15px;
+                padding-right:15px;
+                overflow: hidden;
+                background: var(--mobile-menu-background-color);
+                display:block;
+                float:unset;
+            }
+            #vm-menu a, .vm-dropdown .vm-dropbtn {
+                display: none;
+            }
+            #vm-menu.responsive {
+                position: relative;
+                animation: vm-menu-show 1.8s;
+                z-index: 1;
+            }
+            #vm-menu.responsive a {
+                float: none;
+                display: block;
+                text-align: left;
+            }
+            #vm-menu.responsive .vm-dropdown {float: none;}
+            #vm-menu.responsive .vm-dropdown-content {position: relative;}
+            #vm-menu.responsive .vm-dropdown .vm-dropbtn {
+                display: block;
+                width: 100%;
+                text-align: left;
+            }
+            .vm-mobile{
+                display:block;
+            }
+        }
+        @keyframes vm-menu-show {
+            from {max-height: 0px;}
+            to {max-height: 1000px;}
+        }
+    </style>
+    <script boot>
+        //------------------------------------
+        var url1="https://www.vmiis.com/modules/starter/app01.html"; if($vm.localhost) url1="http://127.0.0.1:8000/vmiis/your-company-business-portal/modules/starter/app01.html";
+        var urls=[url1]; $vm.module_start_id=1;
+        //---------------------------------------------
+        $(urls).each(function(index,url){
+            var ver=localStorage.getItem(url+"ver");
+            var txt=localStorage.getItem(url+"txt");
+            if(ver!=$vm.ver[0] || txt==null || $vm.localhost==true){
+                $.get(url+'?_='+new Date().getTime(),function(new_txt){
+                    localStorage.setItem(url+"txt",new_txt);
+                    localStorage.setItem(url+"ver",$vm.ver[0]);
+                    console.log('loading from url. '+url);
+                    $('#content').append(new_txt.replace(/__ID/g,'_'+index));
+                },'text');
+            }
+            else{
+                console.log('loading from storage. '+url);
+                $('#content').append(txt.replace(/__ID/g,'_'+index));
+            }
+            //---------------------------------------------
+        })
+    </script>
+</html>

@@ -1,0 +1,83 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        var programmes_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_themes'].Programmes;
+        var participant_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_themes'].Participant;
+        var staff_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_themes'].Staff;
+        $("#title__ID").text('Programmes Output');
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",Prg<br>No|Research_Program_uid,Research Program Title|Research_Program,Theme<br>No|UID,Theme ID|Theme_ID,Theme name|Theme_name,Delivery Date|Delivery_Date,Site,Staff<br>No|Theme_Leader_uid,Theme Leader|Theme_Leader";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Program_Leader_uid':
+                case 'Research_Program_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Delivery_Date':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+                case 'Research_Program':
+                    var sql="with tb as (select name=@('Research_Program_name'),value2=uid from [TABLE-"+programmes_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Theme_Leader':
+                    var sql="with tb as (select PUID,Staff_uid=UID,Item1=@('First_name')+' '+@('Last_name') from [TABLE-"+staff_pid+"])";
+                    sql+=",part as (select UID,Item2=@('Short_form_name') from [TABLE-"+participant_pid+"]) ";
+                    sql+=",tot as(select name=Item1+'|'+Item2,value2=staff_uid,Item1,Item2 from tb join part on tb.PUID=part.UID)";
+                    sql+=" select top 10 name,value=Item1,value2,value3=Item2 from tot where name like '%'+@S1+'%' ";
+                    td.autocomplete({
+                        minLength:0,
+                        source:function(request,response){
+                            $VmAPI.request({data:{cmd:'auto',s1:request.term,sql:sql,minLength:0},callback:function(res){
+                                response($vm.autocomplete_list(res.table));
+                            }});
+                        },
+                        select: function(event,ui){
+                            records[I]['Theme_Leader_uid']=ui.item.value2;
+                            records[I]['Site']=ui.item.value3;
+                        }
+                    })
+                    td.focus(function(){td.autocomplete("search","");});
+                break;
+            }
+        }
+        //-------------------------------------
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Research_Program':
+                case 'Theme_Leader':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            dbv.PUID='0';
+            var puid=record.Research_Program_uid; if(puid!=="") dbv.PUID=puid;
+            dbv.PPID=programmes_pid;
+    		if(record.Delivery_Date!=='') dbv.DT1=record.Delivery_Date;
+            dbv.S1=record.Theme_ID;
+            dbv.V1=0; if(record.Theme_Leader_uid!=='') dbv.V1=parseInt(record.Theme_Leader_uid);
+            return true;
+        };
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){  _set_req(); _request_data(); })
+
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

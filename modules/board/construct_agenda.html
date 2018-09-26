@@ -1,0 +1,55 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Form,Agenda Items|_Agenda_Items,Agenda ID|UID,Meeting date|Meeting_date,Time,Location,Attendees,Comments,Direct Link|Link";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+        $("#title__ID").text('Board Meeting | Construct Agenda');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){ _set_req(); _request_data(); })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+               case '_Agenda_Items':
+                   records[I].vm_custom[field]=true;
+                   if(records[I].UID===undefined) return;
+                   var html="<u style='cursor:pointer'>Agenda Items</u>";
+                   td.html(html);
+                   td.find('u').on('click',function(){
+                       $vm.load_module_by_name('wappsystem_crc_backoffice_board_construct_agenda_items',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID,meeting_date:records[I].Meeting_date});
+                   })
+                   break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

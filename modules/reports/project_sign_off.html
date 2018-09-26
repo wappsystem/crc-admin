@@ -1,0 +1,56 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>
+        <span> Type Project name or part of: </span><input type="text" id=Project__ID placeholder="Project" style='width:200px;padding-left:3px'>
+        <a id=aquery__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span><b>Participant - Project Sign Off</b>
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+    function F__ID(){
+        //------------------------
+        VmInclude:__COMPONENT__/toolbar/back.js
+        VmInclude:__COMPONENT__/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //------------------------
+        var _fields="Participant,Project_name,Stream_name,Project_Number,Signing Status|B1";
+        _fields+="";
+        //-------------------------------------
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+        var project_pid=$vm.module_list[$vm.vm['__ID'].name].Project;
+        //-------------------------------------
+        $('#aquery__ID').on('click',function(){ _set_req(); _request_data(); })
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            var today = new Date();
+            $('#t1__ID').datepicker({dateFormat:'dd/mm/yy'});
+            $('#t1__ID').val($.datepicker.formatDate('dd/mm/yy', today));
+        })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            //-------------------------------------
+            var sql="with part as (select Participant=@('Short_form_name'),part_uid=UID from [TABLE-"+participant_pid+"]) ";
+            sql+=" ,proj as (select Project_Number=@('Project_Number'),Project_name=@('Project_name'),pro_uid=UID from [TABLE-"+project_pid+"]) ";
+            sql+="select Participant,Project_Number,Project_name,Stream_name=@('Stream'),PUID,B1 from [TABLE-"+_db_pid+"] join part on PUID=part_uid join proj on pro_uid=@('Project_uid') where Project_name like '%'+@S1+'%' order by Participant";
+            //-------------------------------------
+            _req={cmd:'query_records',sql:sql,s1:$('#Project__ID').val()};
+            //-------------------------------------
+        }
+        _data_process=function(){
+            if(_records.length>0){
+                for(var i=0;i<_records.length;i++){
+                    if(_records[i].B1=='True') _records[i].B1='Executed';
+                    else _records[i].B1='Not yet Executed';
+                }
+            }
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

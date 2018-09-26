@@ -1,0 +1,84 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="No.|Item_number,Item Title|Item_title,Action|Action,Board Documents|DocBoardPaper,Reference Document|DocReference";
+        //_fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete,";
+        //-------------------------------------
+        //var board_agendas_tid=$vm.module_list[_app_id+'the_board_agendas'].var.board_agendas_tid;
+        //-------------------------------------
+        var loc="__COMPONENT__/wappsystem/crc-external/modules/images/Board_Green_small.png"
+        $('#icon__ID').attr("src",loc);
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+          $("#title__ID").text("Board Meeting | "+($vm.vm['__ID'].op.agenda).replace(/_/g,' '));
+          $('#save__ID').hide();;$('#new__ID').hide();_set_req(); _request_data();
+        })
+        $('#D__ID').on('back',function(){ $("#title__ID").text("Board Meeting");$('#save__ID').hide();;$('#new__ID').hide();_set_req(); _request_data(); })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            var sql="with tb as (select Information,ID,UID,PUID,DateTime,Author from [TABLE-"+_db_pid+"] where PUID=@I1  ) ";
+            sql+="select Information,ID,UID,PUID,DateTime,Author from tb order by @('Order') ";
+            _req={cmd:'query_records',db_pid:_db_pid,sql:sql,i1:$vm.vm['__ID'].op.agenda_uid}
+        }
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+              case 'Item_number':
+              case 'Item_title':
+              case 'Action':
+                  records[I].vm_readonly[field]=true;
+              break;
+              case 'DocBoardPaper':
+              case 'DocReference':
+                  records[I].vm_custom[field]=true;
+                  if(records[I][field]===undefined) records[I][field]="";
+                  td.data('filename_field',field);
+                  var html="<u style='cursor:pointer'>"+records[I][field]+"</u>";
+                  html+="<span class=file_buttons></span>";
+                  html+="<form><input type=file style='display:none'></input></form>";
+                  td.html(html);
+                  if(records[I][field]==="" || records[I][field]===null || records[I][field]===undefined) td.find('a.remove_file').css('visibility','hidden');
+                  td.find('u').on('click',function(){
+                      var f_name=$(this).html();
+                      var rid=records[I].ID;
+                      if(rid!==undefined){
+                          $vm.open_link({rid:rid,filename:f_name});
+                      }
+                      else alert("No file was found on server.")
+                  });
+              break;
+
+          }
+
+        }
+        //-------------------------------------
+        _data_process=function(){
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){ //set issue and due date
+        };
+        //-------------------------------------
+        _before_submit=function(record,dbv){ //set client uid as puid
+        };
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

@@ -1,0 +1,68 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        _fields="_Form,Login Name|Login_Name,Organisation,User,Role";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+        $("#title__ID").text('Login - User list');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+              case 'Role':
+                  var html="<select style='border:0;''>\
+                  <option value='' >Please select ...</option>\
+                  <option >The Board</option>\
+                  <option >Participant</option>\
+                  <option >Site Investigator</option>\
+                  <option >Principle Investigator</option>\
+                  <option >Project Leader</option>\
+                  <option >Theme Leader</option>\
+                  <option >Program Leader</option>\
+                  <option >Full Access</option>\
+                  <option >Student</option>\
+                  </select>\
+                  ";
+                  VmInclude:__COMPONENT__/grid/field_select.js
+              break;
+              case 'Organisation':
+                  var sql="with tb as (select name=@('Short_form_name'),value2=uid from [TABLE-"+participant_pid+"])";
+                  sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                  VmInclude:__COMPONENT__/grid/field_auto.js
+              break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

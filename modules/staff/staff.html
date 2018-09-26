@@ -1,0 +1,132 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Form,_Hidden|PUID,Staff<br>No|UID,First name|First_name,Last Name|Last_name,Category (MDQ 2.3)|Category";
+        _fields+=",Role|Role,Rate|Rate,Login Name|Login,Email|Email,Phone|Phone";
+        _fields+=",Start Date|Start_Date,End Date|End_Date,Date Signed|Date_Signed,NDA Document|DocNDA,NDG Signed|NDG_Signed";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var participant_pid=$vm.module_list['wappsystem_crc_backoffice_participant'].table_id;
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'PUID':
+                case 'UID':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Start_Date':
+                case 'End_Date':
+                case 'Date_Signed':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+                case 'Category':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option value='Technical/ Other' >Technical/ Other</option>\
+                    <option value='Professional Research Staff' >Professional Research Staff</option>\
+                    <option value='Post graduate students' >Post graduate students</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Rate':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option value='Program Leader' >Program Leader</option>\
+                    <option value='Key Researcher' >Key Researcher</option>\
+                    <option value='Researcher' >Researcher</option>\
+                    <option value='Other' >Other</option>\
+                    <option value='Student' >Student</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'DocNDA':
+                    VmInclude:__COMPONENT__/grid/field_file.js
+                break;
+                case 'NDG_Signed':
+                    td.html('<input type=checkbox />');
+                    VmInclude:__COMPONENT__/grid/field_checkbox.js
+                break;
+            }
+        }
+        //-------------------------------------
+        _data_process=function(){ };
+        //-------------------------------------
+        var cv=function(v){
+            if(v==="True") return true;
+            else if(v==='1') return true;
+            else if(v==='on') return true;
+            else return false;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){ //set issue and due date
+            for(var i=0;i<_records.length;i++){
+                _records[i].NDG_Signed=cv(_records[i].NDG_Signed);
+            }
+        };
+        //-------------------------------------
+        var cv=function(v){
+            if(v==="True") return true;
+            else if(v==='1') return true;
+            else if(v==='on') return true;
+            else return false;
+        };
+        //-------------------------------------
+        _before_submit=function(record,dbv){ //set client uid as puid
+            if($vm.vm['__ID'].op.puid===undefined){
+                alert("No parent");
+                return false;
+            }
+            dbv.S1=record.Rate;
+    		dbv.PPID=participant_pid;
+    		dbv.PUID=$vm.vm['__ID'].op.puid;
+            return true;
+        };
+        $('#title__ID').text("Staff List - "+$vm.vm['__ID'].op.participant);
+        //-------------------------------------
+        $('#D__ID').on('load',function(){  _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){  _set_req(); _request_data(); })
+
+        _set_req=function(){
+            //-------------------
+            $('#multi__ID').show();
+            if($vm.vm['__ID'].op.new!==undefined || $vm.vm['__ID'].op.sql_where!==undefined){
+                $('#multi__ID').hide();
+            }
+            //-------------------
+            var sql="with tb as (select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1] )";
+            sql+="select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]";
+            //-------------------
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                sql=sql.replace('RowNum between @I6 and @I7',sql_where);
+                sql_n+=" where "+sql_where;
+            }
+            //-------------------
+            _req={cmd:'query_records',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

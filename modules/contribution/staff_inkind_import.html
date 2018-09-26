@@ -1,0 +1,129 @@
+<section>
+    VmInclude:__COMPONENT__/grid/grid_import.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        if($vm.module_list['_system_import_dialog_module']===undefined) $vm.module_list['_system_import_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/import_dialog_module.html'};
+        $vm.load_module_by_name('_system_import_dialog_module','',{})
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+        //-------------------------------------
+        var _fields="_Form,Participant No|Participant_uid,Participant,Project No|Project_ID_uid,Project|Project_ID,Financial_Year,Quarter,Staff No|Staff_uid,Staff,Rate Level|Rate,FTE,FTE Rate|Rate_Dollar,Quarterly Inkind Value|Inkind,_Hidden|FTE_P_Q";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            record.Inkind=record.Inkind.replace('$','');
+            dbv.B2='0'; if(record.Rate=='Student') dbv.B2='1';
+            if(record.FTE!=='') dbv.V1=record.FTE;
+            if(record.Inkind!=='') dbv.V2=record.Inkind;
+            if(record.Financial_Year!=='') dbv.S1=record.Financial_Year;
+            if(record.Quarter!=='') dbv.S2=record.Quarter;
+            if(record.Participant!=='') dbv.S3=record.Participant;
+            if(record.Participant_uid!=='') dbv.PUID=record.Participant_uid;
+            if(record.Project_ID_uid!=='') dbv.V3=record.Project_ID_uid;
+            dbv.PPID=participant_pid;
+            return true;
+        };
+        //-------------------------------------
+        $('#import__ID').on('click',function(){
+            $('#fileform__ID')[0].reset();
+            $('#import_file__ID').trigger('click');
+        })
+        //-------------------------------------
+        $('#import_file__ID').on('change',function(evt){
+            var files = evt.target.files;
+            if(files.length>0){
+                if(confirm("Are you sure to import "+files[0].name+"?\n")){
+                    var reader = new FileReader();
+                    reader.onload = (function(e) {processing_file(e.target.result); });
+                    reader.readAsText(files[0]);
+                }
+            }
+        })
+        //-------------------------------------
+        var number_to_process,number_completed,loop_done,dialog_module_id;
+        //-------------------------------------
+        var processing_file=function(contents){
+            var lines=contents.replace(/\r/g,'\n').replace(/\n\n/g,'\n').split('\n');
+            if(lines.length>1){
+                number_to_process=0;
+                number_completed=0;
+                loop_done=0;
+                dialog_module_id=$vm.get_module_id({name:'_system_import_dialog_module'})
+                var tab='\t';
+                var n1=lines[0].split('\t').length;
+                var n2=lines[0].split(',').length;
+                if(n2>n1) tab=',';
+                var header=lines[0].splitCSV(tab);
+/*                for(var k=0;k<header.length;k++){header[k]=header[k].trim().replace(/ /g,'_');
+                    //if(header[k]=='Participant_No') header[k]='Participant_uid';
+                    //if(header[k]=='Project_No') header[k]='Project_ID_uid';
+                    //if(header[k]=='Project') header[k]='Project_ID';
+                }
+*/
+                var flds=_fields.split(',');
+                var i=1;
+                $vm.open_dialog({name:'_system_import_dialog_module'});
+                (function looper(){
+                    if( i<lines.length ) {
+                        var items=lines[i].splitCSV(tab);
+                        if(items.length>=2 || (items.length==1 && items[0]!=='') ){
+                            var rd={};
+                            for(var j=0;j<flds.length;j++){
+                                var field_name=flds[j].split('|')[0];
+                                var field_id=flds[j].split('|').pop();
+                                var index=header.indexOf(field_name);
+                                if(index!=-1) { rd[field_id]=items[index];
+                                    rd[field_id]=rd[field_id].replace(',','').replace('$','');
+                                }
+                            }
+                            if(jQuery.isEmptyObject(rd)===false){
+                                number_to_process++;
+                                if(_before_submit!==''){
+                                    _dbv={};
+                                    _before_submit(rd,_dbv);
+                                }
+                                //------------------------------------------
+                                //add
+                                var req={cmd:"add_record",db_pid:_db_pid.toString(),data:rd,dbv:_dbv};
+                                $VmAPI.request({data:req,callback:function(res){
+                                    number_completed++;
+                                    processing_file_end();
+                                }})
+                                //------------------------------------------
+                            }
+                        }
+                        i++;
+                        setTimeout(looper, 500);
+                    }
+                    else{
+                        loop_done=1;
+                        processing_file_end();
+                    }
+                })();
+            }
+        }
+        //-------------------------------------
+        var processing_file_end=function(){
+            $('#import_num'+dialog_module_id).text(number_completed.toString());
+            if(loop_done==1 && number_to_process==number_completed){
+                number_to_process=-1;
+                $vm.close_dialog({name:'_system_import_dialog_module'});
+                alert(number_completed.toString()+" records have been imported.");
+                _set_req(); _request_data();
+            }
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

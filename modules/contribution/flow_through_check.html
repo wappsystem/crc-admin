@@ -1,0 +1,132 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>From Project <select id=Project__ID type=select></select>To Project <select id=Project_to__ID type=select></select>
+        <a id=query__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span>Check Flow Through Amount
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+function F__ID(){
+    //------------------------
+    VmInclude:__COMPONENT__/toolbar/back.js
+    VmInclude:__HOST__/common-code/grid/grid.js
+    VmInclude:__COMPONENT__/style/ease-in-out.js
+    var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+    var cash_pid=$vm.module_list[$vm.vm['__ID'].name].cash;
+    var equipment_pid=$vm.module_list[$vm.vm['__ID'].name].equipment;
+    var staff_pid=$vm.module_list[$vm.vm['__ID'].name].Staff;
+    var other_pid=$vm.module_list[$vm.vm['__ID'].name].office;
+    var project_pid=$vm.module_list[$vm.vm['__ID'].name].Project;
+    var participant_project_pid=$vm.module_list[$vm.vm['__ID'].name].Participant_project;
+    var flow_through_pid=$vm.module_list[$vm.vm['__ID'].name].flow_through;
+    //------------------------
+    var $List=$('#Project__ID');
+    sql="select project=@('Project_ID'),project_uid=UID from [TABLE-20003921] order by @('Project_ID')";
+    var req_data={cmd:'query_records',sql:sql};
+    $VmAPI.request({data:req_data,callback:function(res){
+        for(var i=0;i<res.records.length;i++){
+            var project=res.records[i].project;
+            var project_uid=res.records[i].project_uid;
+            $List.append(  $('<option></option>').val(project_uid).html(project))
+        }
+    }});
+    $List.val();
+    //---------------------------------------------
+    var $List2=$('#Project_to__ID');
+    sql="select project=@('Project_ID'),project_uid=UID from [TABLE-20003921] order by @('Project_ID')";
+    var req_data={cmd:'query_records',sql:sql};
+    $List2.append(  $('<option></option>').val("").html(""))
+    $VmAPI.request({data:req_data,callback:function(res){
+        for(var i=0;i<res.records.length;i++){
+            var project=res.records[i].project;
+            var project_uid=res.records[i].project_uid;
+            $List2.append(  $('<option></option>').val(project_uid).html(project))
+        }
+    }});
+    $List2.val();
+    //---------------------------------------------
+    $('#Project__ID').on('change',function(){
+        //request_data();
+    })
+    //---------------------------------------------
+    $('#D__ID').on('load',function(){
+        //request_data();
+    })
+    //---------------------------------------------
+    $('#query_data__ID').on('click',function(){
+        //request_data();
+    })
+    //-------------------------------------
+    var _fields="Participant No|part_uid,Participant,Project No|Project_ID_uid,Total_Contribution,Percentage,Actual,Recorded,To Project|to_project,Difference";
+    $('#query__ID').on('click',function(){_set_req();})
+    //-------------------------------------
+    var request_num=0;
+    _set_req=_set_req_export=function(){
+        var to_project_ft="%%"
+        if ($('#Project_to__ID').val()!=="") to_project_ft=$('#Project_to__ID').val();
+        var sql="with part as (select part_uid=UID,participant=@('Short_form_name') from [TABLE-"+participant_pid+"]) ";
+        sql+=",ca  as (select PUID,cash=sum(V1) from [TABLE-"+cash_pid+"] where V2=@I1 group by PUID) "; //V1 Cash V3=Paid
+        sql+=",equ  as (select eqPUID=PUID,equipment=sum(V3) from [TABLE-"+equipment_pid+"] where V2=@I1 group by PUID) "; // V3 quarterly
+        sql+=",staff  as (select staffPUID=PUID,staff_inkind=sum(V2) from [TABLE-"+staff_pid+"] where V3=@I1 and B2<>'True' group by PUID) ";
+        sql+=",oth  as (select othPUID=PUID,other=sum(V3) from [TABLE-"+other_pid+"] where V2=@I1 group by PUID) "; // V3 quaterly
+        sql+=",temp as (select part_uid,Participant,cash,equipment,staff_inkind,other from part ";
+        sql+=" left join ca on part_uid=PUID";
+        sql+=" left join equ on part_uid=eqPUID";
+        sql+=" left join staff on part_uid=staffPUID";
+        sql+=" left join oth on part_uid=othPUID) ";
+        sql+=",ft  as (select ftpuid=PUID,Recorded=V1,Percentage=@('Percentage'),to_project=@('Project_ID') from [TABLE-"+flow_through_pid+"] where V3=@I1 and @('Project_ID_uid') like @S2 ) ";
+        sql+=" select part_uid,Participant,cash,equipment,staff_inkind,other,Recorded,Percentage,to_project from temp left join ft on part_uid=ftpuid where (cash<>'' or equipment <>'' or staff_inkind<>'' or other<>'' )";
+        sql+=" order by participant";
+        _req={cmd:'query_records',sql:sql,i1:$('#Project__ID').val(),s2:to_project_ft};
+    }
+    _data_process=function(){
+        var total_sum=0;
+        var to_project=$('#Project__ID option:selected').text()
+        var to_project_uid=$('#Project__ID').val()
+        var part_contribution=[];
+        for(var i=0;i<_records.length;i++){
+            if(part_contribution[i]===undefined) part_contribution[i]=0;
+            if(_records[i].cash!=='') part_contribution[i]+=parseInt(_records[i].cash);
+            if(_records[i].equipment!=='') part_contribution[i]+=parseInt(_records[i].equipment)/2;
+            if(_records[i].staff_inkind!=='') part_contribution[i]+=parseInt(_records[i].staff_inkind)/2;
+            if(_records[i].other!=='') part_contribution[i]+=parseInt(_records[i].other/2);
+            total_sum+=part_contribution[i];
+            _records[i].Percentage=_records[i].Percentage;
+            _records[i].Total_Contribution=part_contribution[i];
+            _records[i].Actual=part_contribution[i]*parseInt(_records[i].Percentage)/100;
+            _records[i].Project_ID_uid=to_project_uid;
+            _records[i].Project_ID=to_project;
+            if(_records[i].Actual!=_records[i].Recorded) _records[i].Difference="Error"
+            else _records[i].Difference="";
+            //if(total_sum==0) delete _records[i]
+        }
+    }
+    //-------------------------------------
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+    });
+    //-------------------------------------
+    _cell_render=function(records,I,field,td,set_value,source){
+        switch(field){
+            case 'Actual':
+            case 'Recorded':
+            case 'Total_Contribution':
+                if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                td.html(formatter.format(records[I][field])); //add $ sign
+            break;
+            case 'Difference':
+                if(source=="grid") td.css("font-weight","bold").css('color','red');
+            break;
+        }
+    }
+}
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

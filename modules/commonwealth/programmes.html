@@ -1,0 +1,70 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        var participant_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_programmes'].Participant;
+        var staff_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_programmes'].Staff;
+        $("#title__ID").text('Programmes');
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",Programmes<br>No|UID,Research Program Title|Research_Program_name,Research Program Description|Research_Program_Description,National Research Priority|National_Research_Priority,Associated Priority Goal|Associated_Priority_Goal,Site,Staff<br>No|Program_Leader_uid,Program Leader|Program_Leader";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'UID':
+                case 'Program_Leader_uid':
+                case 'Site':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Program_Leader':
+                    var sql="with tb as (select PUID,Staff_uid=UID,Item1=@('First_name')+' '+@('Last_name') from [TABLE-"+staff_pid+"])";
+                    sql+=",part as (select UID,Item2=@('Short_form_name') from [TABLE-"+participant_pid+"]) ";
+                    sql+=",tot as(select name=Item1+'|'+Item2,value2=staff_uid,Item1,Item2 from tb join part on tb.PUID=part.UID)";
+                    sql+=" select top 10 name,value=Item1,value2,value3=Item2 from tot where name like '%'+@S1+'%' ";
+                    td.autocomplete({
+                        minLength:0,
+                        source:function(request,response){
+                            $VmAPI.request({data:{cmd:'auto',s1:request.term,sql:sql,minLength:0},callback:function(res){
+                                response($vm.autocomplete_list(res.table));
+                            }});
+                        },
+                        select: function(event,ui){
+                            records[I]['Program_Leader_uid']=ui.item.value2;
+                            records[I]['Site']=ui.item.value3;
+                        }
+                    })
+                    td.focus(function(){td.autocomplete("search","");});
+                break;
+            }
+        }
+        //-------------------------------------
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Program_Leader':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            dbv.S1=record.Program_Leader;
+            dbv.V1=0; if(record.Stream_uid!=='') dbv.V1=parseInt(record.Program_Leader_uid);
+        };
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

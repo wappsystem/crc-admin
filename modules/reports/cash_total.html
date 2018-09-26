@@ -1,0 +1,75 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>Accumulated including: <select id=YY__ID type=select></select>
+        <a id=query__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span>Cash - Total
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+    function F__ID(){
+        //------------------------
+        VmInclude:__COMPONENT__/toolbar/back.js
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //------------------------
+        //FY dropdown
+        var $List2=$('#YY__ID');
+        $List2.append(  $('<option></option>').val("14").html('FY1314')  );
+        $List2.append(  $('<option></option>').val("15").html('FY1415')  );
+        $List2.append(  $('<option></option>').val("16").html('FY1516')  );
+        $List2.append(  $('<option></option>').val("17").html('FY1617')  );
+        $List2.append(  $('<option></option>').val("18").html('FY1718')  );
+        $List2.append(  $('<option></option>').val("19").html('FY1819')  );
+        $List2.append(  $('<option></option>').val("20").html('FY1920')  );
+        $List2.val();
+    	//---------------------------------------------
+        var _fields="FY,Total (Cash)|Amount,Committed,Variance";
+        //-------------------------------------
+        var formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+        });
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            if(records[I].Sort=='05'){
+                td.parent().find('td').css('background-color','#aaa').css('font-weight','700');
+            }
+            switch(field){
+                case 'Amount':
+                case 'Committed':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                    td.html(formatter.format(records[I][field])); //add $ sign
+                break;
+                case 'Variance':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap').css('background-color','#aaa').css('font-weight','700');
+                    if(parseFloat(records[I][field])<0)  td.css('background-color','#ff0000')
+                    td.html(formatter.format(records[I][field])); //add $ sign
+                break;
+            }
+        }
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ _set_req();                  })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            //-------------------------------------
+            var cash_pid=$vm.module_list['wappsystem_crc_backoffice_reports_cash_total'].cash;
+            var cash_committed_pid=$vm.module_list['wappsystem_crc_backoffice_reports_cash_total'].cash_agreement;
+            var sql=" with ";
+            sql+="cash as (select FY=@S1,Amount=Sum(ISNULL(V1,'0')) from [TABLE-"+cash_pid+"] where CAST(RIGHT(S1,2) AS INT)<=@I2 ) ";
+            sql+=",comm as (select cFY=@S1,Committed=Sum(ISNULL(V1,'0')) from [TABLE-"+cash_committed_pid+"] where CAST(RIGHT(S1,2) AS INT)<=@I2 ) ";
+            sql+="select FY,Amount,Committed,Variance=ISNULL(Amount,'0') - ISNULL(Committed,'0') from cash join comm on FY=cFY ";
+            //-------------------------------------
+            _req={cmd:'query_records',sql:sql,i2:$('#YY__ID').val(),s1:$('#YY__ID option:selected').text()};
+            //-------------------------------------
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

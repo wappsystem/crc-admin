@@ -1,0 +1,136 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>Select participant <select id=Participant__ID type=select></select> Accumulated including <select id=YY__ID type=select></select>
+        <a id=query__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span>Participant Project Contribution
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+function F__ID(){
+    //------------------------
+    VmInclude:__COMPONENT__/toolbar/back.js
+    VmInclude:__HOST__/common-code/grid/grid.js
+    VmInclude:__COMPONENT__/style/ease-in-out.js
+    var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+    var cash_pid=$vm.module_list[$vm.vm['__ID'].name].cash;
+    var equipment_pid=$vm.module_list[$vm.vm['__ID'].name].equipment;
+    var staff_pid=$vm.module_list[$vm.vm['__ID'].name].Staff;
+    var other_pid=$vm.module_list[$vm.vm['__ID'].name].office;
+    var project_pid=$vm.module_list[$vm.vm['__ID'].name].Project;
+    var participant_project_pid=$vm.module_list[$vm.vm['__ID'].name].Participant_project;
+    //------------------------
+    //FY dropdown
+    var $List2=$('#YY__ID');
+    $List2.append(  $('<option></option>').val("14").html('FY1314')  );
+    $List2.append(  $('<option></option>').val("15").html('FY1415')  );
+    $List2.append(  $('<option></option>').val("16").html('FY1516')  );
+    $List2.append(  $('<option></option>').val("17").html('FY1617')  );
+    $List2.append(  $('<option></option>').val("18").html('FY1718')  );
+    $List2.append(  $('<option></option>').val("19").html('FY1819')  );
+    $List2.append(  $('<option></option>').val("20").html('FY1920')  );
+    $List2.val();
+    //------------------------
+    var $List=$('#Participant__ID');
+    sql="select participant=@('Short_form_name'),participant_uid=UID from [TABLE-"+participant_pid+"] order by @('Short_form_name')";
+    var req_data={cmd:'query_records',sql:sql};
+    $VmAPI.request({data:req_data,callback:function(res){
+        for(var i=0;i<res.records.length;i++){
+            var participant=res.records[i].participant;
+            var participant_uid=res.records[i].participant_uid;
+            $List.append(  $('<option></option>').val(participant_uid).html(participant))
+        }
+    }});
+    $List.val();
+    //---------------------------------------------
+    $('#Participant__ID').on('change',function(){
+        //request_data();
+    })
+    //---------------------------------------------
+    $('#D__ID').on('load',function(){
+        //request_data();
+    })
+    //---------------------------------------------
+    $('#query_data__ID').on('click',function(){
+        //request_data();
+    })
+    //-------------------------------------
+    _fields="Project|project,PA Signed|pasigned,Cash|cash,Staff inkind|staff_inkind,Equipment|equipment,Other/Office Space|other,Project Contribution Total|project_contribution,Project Shares Contribution|project_contribution_pa";
+    $('#query__ID').on('click',function(){_set_req();})
+    //-------------------------------------
+    var request_num=0;
+    _set_req=function(){
+        var sql="with proj as (select proj_uid=UID,project=@('Project_ID') from [TABLE-"+project_pid+"]) ";
+        sql+=",ca  as (select V2,cash=sum(V1) from [TABLE-"+cash_pid+"] where PUID=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by V2) "; //V1 Cash V3=Paid
+        sql+=",equ  as (select eqV2=V2,equipment=sum(V3) from [TABLE-"+equipment_pid+"] where PUID=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by V2) "; // V3 quarterly
+        sql+=",staff  as (select staffV2=V3,staff_inkind=sum(V2) from [TABLE-"+staff_pid+"] where PUID=@I1 and B2<>'True' and CAST(RIGHT(S1,2) AS INT)<=@I2 group by V3) ";
+        sql+=",oth  as (select othV2=V2,other=sum(V3) from [TABLE-"+other_pid+"] where PUID=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by V2) "; // V3 quaterly
+        sql+=",pa  as (select paV2=V1,pasigned='Yes' from [TABLE-"+participant_project_pid+"] where PUID=@I1 and B1='True') ";
+        sql+=" select project,pasigned,cash,equipment,staff_inkind,other from proj ";
+        sql+=" left join ca on proj_uid=V2";
+        sql+=" left join equ on proj_uid=eqV2";
+        sql+=" left join staff on proj_uid=staffV2";
+        sql+=" left join oth on proj_uid=othV2";
+        sql+=" left join pa on proj_uid=paV2";
+        sql+=" order by project";
+        _req={cmd:'query_records',sql:sql,i1:$('#Participant__ID').val(),i2:$('#YY__ID').val()};
+    }
+    _data_process=function(){
+        var total_sum=[];
+        var total_sum_pa=[];
+        var proj_contribution_pa=[];
+        var proj_contribution=[];
+        for(var i=0;i<_records.length;i++){
+            if(proj_contribution_pa[i]===undefined) {proj_contribution_pa[i]=0;}
+            if(proj_contribution[i]===undefined) {proj_contribution[i]=0;}
+            if(total_sum_pa[i]===undefined) {total_sum_pa[i]=0;}
+            if(total_sum[i]===undefined) {total_sum[i]=0;}
+            if(_records[i].pasigned=='Yes') {
+                if(_records[i].cash!=='') {proj_contribution_pa[i]+=parseInt(_records[i].cash);proj_contribution[i]+=parseInt(_records[i].cash);}
+                if(_records[i].equipment!=='') {proj_contribution_pa[i]+=parseInt(_records[i].equipment)/2;proj_contribution[i]+=parseInt(_records[i].equipment);}
+                if(_records[i].staff_inkind!=='') {proj_contribution_pa[i]+=parseInt(_records[i].staff_inkind)/2;proj_contribution[i]+=parseInt(_records[i].staff_inkind);}
+                if(_records[i].other!=='') {proj_contribution_pa[i]+=parseInt(_records[i].other/2);proj_contribution[i]+=parseInt(_records[i].other);}
+            }
+            else {
+                proj_contribution_pa[i]=0;
+                if(_records[i].cash!=='') proj_contribution[i]+=parseInt(_records[i].cash);
+                if(_records[i].equipment!=='') proj_contribution[i]+=parseInt(_records[i].equipment);
+                if(_records[i].staff_inkind!=='') proj_contribution[i]+=parseInt(_records[i].staff_inkind);
+                if(_records[i].other!=='') proj_contribution[i]+=parseInt(_records[i].other);
+            }
+            total_sum_pa[i]+=proj_contribution_pa[i];
+            total_sum[i]+=proj_contribution[i];
+        }
+        for(var i=0;i<_records.length;i++){
+            _records[i].project_contribution_pa=(total_sum_pa[i]).toFixed(2);
+            _records[i].project_contribution=(total_sum[i]).toFixed(2);
+        }
+    }
+    //-------------------------------------
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+    });
+    //-------------------------------------
+    _cell_render=function(records,I,field,td,set_value,source){
+        switch(field){
+            case 'cash':
+            case 'equipment':
+            case 'staff_inkind':
+            case 'other':
+            case 'project_contribution':
+            case 'project_contribution_pa':
+                if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                td.html(formatter.format(records[I][field])); //add $ sign
+            break;
+        }
+    }
+}
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

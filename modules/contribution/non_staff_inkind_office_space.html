@@ -1,0 +1,261 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid_contribution.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //------------------------
+          //FY dropdown
+          var $List2=$('#FY__ID');
+          $List2.append(  $('<option></option>').val("").html('')  );
+          $List2.append(  $('<option></option>').val("FY1314").html('FY1314')  );
+          $List2.append(  $('<option></option>').val("FY1415").html('FY1415')  );
+          $List2.append(  $('<option></option>').val("FY1516").html('FY1516')  );
+          $List2.append(  $('<option></option>').val("FY1617").html('FY1617')  );
+          $List2.append(  $('<option></option>').val("FY1718").html('FY1718')  );
+          $List2.append(  $('<option></option>').val("FY1819").html('FY1819')  );
+          $List2.append(  $('<option></option>').val("FY1920").html('FY1920')  );
+          $List2.val();
+        //-------------------------------------
+        //var cash_contribution_pid=$vm.module_list['__ID'].table_id;
+        var part_uid="";
+        var project_pid=$vm.module_list[$vm.vm['__ID'].name].Project;
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+        var rate_pid=$vm.module_list[$vm.vm['__ID'].name].Rate;
+        var staff_pid=$vm.module_list[$vm.vm['__ID'].name].Staff;
+        $("#title__ID").text('Non Staff Inkind Office');
+        //-------------------------------------
+        var _fields="_Form,Participant No|Participant_uid,Participant,Project No|Project_ID_uid,Project|Project_ID,Financial_Year,Quarter,";
+        _fields+="Contribution Type|Contribution_type,Location Address|Description,Area (m2)|Quantity,Cost per m2|Unit_Cost,Total Cost|Total_Cost,% CRC Use|CRC_Use,Value to CRC|CRC_value,Claims|Claim";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Participant_uid':
+                case 'Project_ID_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Contribution_type':
+                    records[I].vm_readonly[field]=true;
+                    records[I][field]='Office Space';
+                break;
+                case 'Participant':
+                    var sql="with tb as (select name=@('Short_form_name'),value2=uid from [TABLE-"+participant_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Project_ID':
+                    var sql="with tb as (select name=@('Project_ID'),value2=uid from [TABLE-"+project_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    td.autocomplete({
+                        minLength:0,
+                        source:function(request,response){
+                            $VmAPI.request({data:{cmd:'auto',s1:request.term,sql:sql,minLength:0},callback:function(res){
+                                response($vm.autocomplete_list(res.table));
+                            }});
+                        },
+                        select: function(event,ui){
+                            records[I]['Project_ID_uid']=ui.item.value2;
+                            for(key in ui.item){
+                                if(key.indexOf('field_')!==-1){
+                                    var k=key.replace('field_','')
+                                    var v=ui.item[key];
+                                    set_value(v,records,I,k);
+                                    if(source=='grid'){
+                                        td.parent().find("td[data-id='"+k+"']").html(v);
+                                    }
+                                    else{
+                                        td.parent().parent().find("td[data-id='"+k+"']").html(v);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    td.focus(function(){td.autocomplete("search","");});
+                break;
+                case 'Staff':
+                //alert(records[I].Participant_uid)
+                    var sql="with tb as (select name=@('First_name')+' '+@('Last_name'),value2=uid from [TABLE-"+staff_pid+"]  where PUID="+records[I].Participant_uid+" )";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Financial_Year':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >FY1314</option>\
+                    <option >FY1415</option>\
+                    <option >FY1516</option>\
+                    <option >FY1617</option>\
+                    <option >FY1718</option>\
+                    <option >FY1819</option>\
+                    <option >FY1920</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Quarter':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >1</option>\
+                    <option >2</option>\
+                    <option >3</option>\
+                    <option >4</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Unit_Cost':
+                case 'Opening_WDV':
+                case 'Closing_WDV':
+                case 'Claim':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                    if(records[I][field]!=='') td.html('$ '+parseInt(records[I][field]) );
+                    else td.html('') //add $ sign
+                break;
+                case 'Total_Cost':
+                case 'CRC_value':
+                    records[I].vm_readonly[field]=true;
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                    if(records[I][field]!=='') td.html('$ '+parseInt(records[I][field]) );
+                    else td.html('') //add $ sign
+                break;
+                case 'Purchase_Date':
+                VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+            }
+        }
+        //-------------------------------------
+        _cell_value_process=function(value,field){
+            switch(field){
+                case 'Unit_Cost':
+                case 'Opening_WDV':
+                case 'Closing_WDV':
+                case 'Total_Cost':
+                case 'CRC_value':
+                case 'Claim':
+                    return value.replace('$','').replace(/ /g,'');
+            }
+            return value;
+        }
+        //-------------------------------------
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Participant':
+                    part_uid=_records[I]['Participant_uid'];
+                    _render(I);
+                break;
+                case 'Project_ID':
+                    _render(I);
+                break;
+                case 'Quantity':
+                    if(records[I]['Unit_Cost']!=='' & records[I]['Quantity']!==''){
+                       records[I]['Total_Cost']=records[I]['Unit_Cost']*records[I]['Quantity'];
+                    }
+                    if(records[I]['Total_Cost']!=='' & records[I]['CRC_Use']!==''){
+                       records[I]['CRC_value']=records[I]['Total_Cost']*records[I]['CRC_Use']/100;
+                    }
+                    if(records[I]['CRC_value']!==''){
+                       //records[I]['Claim']=records[I]['CRC_value']/4;
+                    }
+                   _render(I);
+                   break;
+                case 'Unit_Cost':
+                    if(records[I]['Unit_Cost']!=='' & records[I]['Quantity']!==''){
+                       records[I]['Total_Cost']=records[I]['Unit_Cost']*records[I]['Quantity'];
+                    }
+                    if(records[I]['Total_Cost']!=='' & records[I]['CRC_Use']!==''){
+                       records[I]['CRC_value']=records[I]['Total_Cost']*records[I]['CRC_Use']/100;
+                    }
+                    if(records[I]['CRC_value']!==''){
+                       //records[I]['Claim']=records[I]['CRC_value']/4;
+                    }
+                   _render(I);
+                   break;
+                case 'Total_Cost':
+                    if(records[I]['Unit_Cost']!=='' & records[I]['Quantity']!==''){
+                       records[I]['Total_Cost']=records[I]['Unit_Cost']*records[I]['Quantity'];
+                    }
+                    if(records[I]['Total_Cost']!=='' & records[I]['CRC_Use']!==''){
+                       records[I]['CRC_value']=records[I]['Total_Cost']*records[I]['CRC_Use']/100;
+                    }
+                    if(records[I]['CRC_value']!==''){
+                       //records[I]['Claim']=records[I]['CRC_value']/4;
+                    }
+                   _render(I);
+                   break;
+                case 'CRC_Use':
+                    if(records[I]['Unit_Cost']!=='' & records[I]['Quantity']!==''){
+                       records[I]['Total_Cost']=records[I]['Unit_Cost']*records[I]['Quantity'];
+                    }
+                    if(records[I]['Total_Cost']!=='' & records[I]['CRC_Use']!==''){
+                       records[I]['CRC_value']=records[I]['Total_Cost']*records[I]['CRC_Use']/100;
+                    }
+                    if(records[I]['CRC_value']!==''){
+                       //records[I]['Claim']=records[I]['CRC_value']/4;
+                    }
+                   _render(I);
+                   break;
+                case 'Claim':
+                    if(records[I]['Unit_Cost']!=='' & records[I]['Quantity']!==''){
+                       records[I]['Total_Cost']=records[I]['Unit_Cost']*records[I]['Quantity'];
+                    }
+                    if(records[I]['Total_Cost']!=='' & records[I]['CRC_Use']!==''){
+                       records[I]['CRC_value']=records[I]['Total_Cost']*records[I]['CRC_Use']/100;
+                    }
+                    if(records[I]['CRC_value']!==''){
+                       //records[I]['Claim']=records[I]['CRC_value']/4;
+                    }
+                   _render(I);
+                   break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if(record.Claim!=='') dbv.V3=record.Claim;
+            if(record.CRC_value!=='') dbv.V1=record.CRC_value;
+            if(record.Financial_Year!=='') dbv.S1=record.Financial_Year;
+            if(record.Quarter!=='') dbv.S2=record.Quarter;
+            if(record.Participant!=='') dbv.S3=record.Participant;
+            if(record.Participant_uid!=='') dbv.PUID=record.Participant_uid;
+            if(record.Project_ID_uid!=='') dbv.V2=record.Project_ID_uid;
+            dbv.B2='1'; //office space
+            dbv.PPID=participant_pid;
+            return true;
+        };
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _set_req=function(){
+            var sql="with tb as (select Information,ID,UID,PUID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1]  where @('Contribution_type')='Office Space' and  @('Participant') like '%'+@S2+'%' and @('Project_ID') like '%'+@S3+'%' and @('Financial_Year') like '%'+@S4+'%')";
+            sql+="select Information,ID,UID,PUID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]  where @('Contribution_type')='Office Space' and  @('Participant') like '%'+@S2+'%' and @('Project_ID') like '%'+@S3+'%' and @('Financial_Year') like '%'+@S4+'%'";
+            _req={cmd:'query_records',db_pid:_db_pid,sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),s2:$('#participant__ID').val(),s3:$('#project__ID').val(),s4:$('#FY__ID').val(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+        _set_req_export=function(){
+            var sql="with tb as (select Information,ID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"]  where @('Contribution_type')='Office Space')";
+            sql+="select Information,ID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb";
+            _set_from_to();
+            if(_from!='0' && _to!='0') sql+=" where RowNum between @I6 and @I7";
+            _req={cmd:'query_records',sql:sql,i6:_from,i7:_to}
+        }
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

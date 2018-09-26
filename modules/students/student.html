@@ -1,0 +1,140 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        var project_pid=$vm.module_list[$vm.vm['__ID'].name].Project;
+        //-------------------------------------
+        var _fields="_Form";
+        _fields+=",_Document,Name,Login name|login_name,Email address|Email_address,Show Email|Show_Email,Date Approved|Date_Approved";
+        _fields+=",Scholarship Start Date|Scholarship_Start_Date,Scholarship End date|Scholarship_End_Date,University Attached|University_Attached";
+        _fields+=",Current Scholarship Other than CRC|Current_Scholarship,Program|Program,Type of scholarship approved|Type_scholarship_approved";
+        _fields+=",Total Duration |Total_Duration,Primary Supervisor|Primary_Supervisor,Secondary Supervisor|Secondary_Supervisor,_Hidden|Project_ID,Project,_Hidden|Project_ID_uid,Student Thesis Title|Thesis,Letter of offer Issued|Letter_Issued";
+        _fields+=",Letter of offer Signed|Letter_Signed,Withdrew,Industry Placement|Industry_Placement,Remarks|Remarks";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _fields_e="Name,Login name|login_name,Email address|Email_address,Show Email|Show_Email,Date Approved|Date_Approved";
+        _fields_e+=",Scholarship Start Date|Scholarship_Start_Date,Scholarship End date|Scholarship_End_Date,University Attached|University_Attached";
+        _fields_e+=",Current Scholarship Other than CRC|Current_Scholarship,Program|Program,Type of scholarship approved|Type_scholarship_approved";
+        _fields_e+=",Total Duration |Total_Duration,Primary Supervisor |Primary_Supervisor,Secondary Supervisor|Secondary_Supervisor,Project,Student Thesis Title|Thesis,Letter of offer Issued|Letter_Issued";
+        _fields_e+=",Letter of offer Signed|Letter_Signed,Withdrew,Industry Placement|Industry_Placement,Remarks|Remarks";
+        //-------------------------------------
+        $("#title__ID").text('Students');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'PUID':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case '_Document':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].UID===undefined) return;
+                    var html="<u style='cursor:pointer'>Documents..</u>";
+                    td.html(html);
+                    td.find('u').on('click',function(){
+                        $vm.load_module_by_name('wappsystem_crc_backoffice_students_documents',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID,student:records[I].Name});
+                    })
+                break;
+                case 'Program':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >Master</option>\
+                    <option >PhD</option>\
+                    <option >IBL</option>\
+                    <option >Vacation</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Type_scholarship_approved':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >Full</option>\
+                    <option >Top up</option>\
+                    <option >Vacation Top u</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Withdrew':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >No</option>\
+                    <option >Yes</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Scholarship_Start_Date':
+                case 'Scholarship_End_Date':
+                case 'Date_Approved':
+                case 'Letter_Issued':
+                case 'Letter_Signed':
+                case 'Date_Approved':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+                case 'Show_Email':
+                    td.html('<input type=checkbox />');
+                    VmInclude:__COMPONENT__/grid/field_checkbox.js
+                break;
+                case 'Project':
+                    var sql="with tb as (select name=@('Project_name'),value2=uid from [TABLE-"+project_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    td.autocomplete({
+                        minLength:0,
+                        source:function(request,response){
+                            $VmAPI.request({data:{cmd:'auto',s1:request.term,sql:sql,minLength:0},callback:function(res){
+                                response($vm.autocomplete_list(res.table));
+                            }});
+                        },
+                        select: function(event,ui){
+                            records[I]['Project_ID_uid']=ui.item.value2;
+                            for(key in ui.item){
+                                if(key.indexOf('field_')!==-1){
+                                    var k=key.replace('field_','')
+                                    var v=ui.item[key];
+                                    set_value(v,records,I,k);
+                                    if(source=='grid'){
+                                        td.parent().find("td[data-id='"+k+"']").html(v);
+                                    }
+                                    else{
+                                        td.parent().parent().find("td[data-id='"+k+"']").html(v);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    td.focus(function(){td.autocomplete("search","");});
+                break;
+            }
+        }
+
+        //-------------------------------------
+        _pre_data_process=function (){
+        };
+        //-------------------------------------
+        var cv=function(v){
+            if(v==="True") return true;
+            else if(v==='1') return true;
+            else if(v==='on') return true;
+            else return false;
+        };
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            dbv.B1='0'; if(record.Show_Email=='1') dbv.B1='1';
+            return true;
+        };
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

@@ -1,0 +1,160 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Form,_Hidden|Participant_No,_Hidden|Project_uid,Project_ID,_Hidden|Stream_uid,Stream|Stream,Percent Contribution|Contribution,Project Agreement Signed|Project_Agreement_Signed";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        var participant_pid=$vm.module_list['wappsystem_crc_backoffice_participant'].table_id;
+        var stream_pid=$vm.module_list['wappsystem_crc_backoffice_project_milestone'].Stream;
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Contribution':
+                case 'Participant_No':
+                case 'Project_ID_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Project_Agreement_Signed':
+                    td.html('<input type=checkbox />');
+                    VmInclude:__COMPONENT__/grid/field_checkbox.js
+                break;
+                case 'Project_ID':
+                    var sql="with tb as (select name=@('Project_ID'),value2=uid from [TABLE-20003921])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    td.autocomplete({
+                        minLength:0,
+                        source:function(request,response){
+                            $VmAPI.request({data:{cmd:'auto',s1:request.term,sql:sql,minLength:0},callback:function(res){
+                                response($vm.autocomplete_list(res.table));
+                            }});
+                        },
+                        select: function(event,ui){
+                            records[I]['Project_uid']=ui.item.value2;
+                            for(key in ui.item){
+                                if(key.indexOf('field_')!==-1){
+                                    var k=key.replace('field_','')
+                                    var v=ui.item[key];
+                                    set_value(v,records,I,k);
+                                    if(source=='grid'){
+                                        td.parent().find("td[data-id='"+k+"']").html(v);
+                                    }
+                                    else{
+                                        td.parent().parent().find("td[data-id='"+k+"']").html(v);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    td.focus(function(){td.autocomplete("search","");});
+                break;
+            case 'Stream':
+                 if(records[I]['Project_uid']!==''){
+                     var sql="with tb as (select name=@('Stream_Name'),value2=uid,value3=@('Contribution') from [TABLE-"+stream_pid+"] where PUID="+records[I]['Project_uid']+")";
+                     sql+=" select top 10 name,value=name,value2,value3 from tb where Name like '%'+@S1+'%' ";
+                     td.autocomplete({
+                         minLength:0,
+                         source:function(request,response){
+                             $VmAPI.request({data:{cmd:'auto',s1:request.term,sql:sql,minLength:0},callback:function(res){
+                                 response($vm.autocomplete_list(res.table));
+                             }});
+                         },
+                         select: function(event,ui){
+                             records[I]['Stream_uid']=ui.item.value2;
+                             records[I]['Contribution']=ui.item.value3;
+                         }
+                     })
+                     td.focus(function(){td.autocomplete("search","");});
+                 }
+             break;
+            }
+        }
+        _data_process=function (){
+            for(var i=0;i<_records.length;i++){
+                _records[i].Participant_No=_records[i].PUID;
+            }
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+            for(var i=0;i<_records.length;i++){
+                _records[i].Project_Agreement_Signed=cv(_records[i].Project_Agreement_Signed);
+            }
+            if($vm.vm['__ID'].op.puid!==undefined){
+                _records[0].Participant_No=$vm.vm['__ID'].op.puid;
+            }
+        };
+        //-------------------------------------
+        var cv=function(v){
+            if(v==="True") return true;
+            else if(v==='1') return true;
+            else if(v==='on') return true;
+            else return false;
+        };
+        //-------------------------------------
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project_ID':
+                case 'Stream':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if($vm.vm['__ID'].op.puid===undefined){
+                alert("No parent");
+                return false;
+            }
+            dbv.V1=record.Project_uid;
+            if(record.Stream_uid!='') dbv.V2=record.Stream_uid;
+            dbv.B1='0'; if(record.Project_Agreement_Signed=='1') dbv.B1='1';
+    		dbv.PPID=participant_pid;
+    		dbv.PUID=$vm.vm['__ID'].op.puid;
+            return true;
+        };
+        $('#parent__ID').text("Project List - "+$vm.vm['__ID'].op.participant);
+        //-------------------------------------
+        $('#D__ID').on('load',function(){  _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){  _set_req(); _request_data(); })
+        //$('#query__ID').on('click',function(){ _set_req_with_sql_where(); _request_data(); })
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            $('#multi__ID').show();
+            if($vm.vm['__ID'].op.new!==undefined || $vm.vm['__ID'].op.sql_where!==undefined){
+                $('#multi__ID').hide();
+            }
+            //-------------------
+            var sql="with tb as (select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1] )";
+            sql+="select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]";
+            //-------------------
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                sql=sql.replace('RowNum between @I6 and @I7',sql_where);
+                sql_n+=" where "+sql_where;
+            }
+            //-------------------
+            _req={cmd:'query_records',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

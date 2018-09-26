@@ -1,0 +1,43 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>
+        <span>Date:</span> <input type=text id=t1__ID placeholder="" style='width:80px;padding-left:3px' />
+        <a id=aquery__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span><b>Commonwealth Milestones changes after selected date</b> <span id=alloc_time__ID></span>
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+    function F__ID(){
+        //------------------------
+        VmInclude:__COMPONENT__/toolbar/back.js
+        VmInclude:__COMPONENT__/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //------------------------
+        var _fields="Output,Output Delivery Date,Commonwealth Milestones|Milestone,Milestone Delivery Date,Achieved,Remark";//,Start_date,Completion_Date";
+        _fields+=",Update_Date,Updated_by";
+        //-------------------------------------
+        $('#aquery__ID').on('click',function(){ _set_req(); _request_data(); })
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            var today = new Date();
+            $('#t1__ID').datepicker({dateFormat:'dd/mm/yy'});
+            $('#t1__ID').val($.datepicker.formatDate('dd/mm/yy', today));
+        })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            //-------------------------------------
+            var sql="select Information,a=convert(datetime,@('Update_Date'),103)  from [TABLE-"+_db_pid+"] where convert(datetime,@('Update_Date'),103)>=@T1 order by a desc";
+            //-------------------------------------
+            _req={cmd:'query_records',sql:sql,t1:$('#t1__ID').val(),};
+            //-------------------------------------
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

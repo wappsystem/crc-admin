@@ -1,0 +1,131 @@
+<div>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a><span class=tab__ID></span><span id=nav_link__ID></span>
+    </div>
+    <div style='clear:left;'>
+        <div class='nav__ID'>
+            <span><b>Participant</b></span>
+             <ul>
+               <li data-name=wappsystem_crc_backoffice_participant style='color:#227A7B'>Participant</li>
+            </ul>
+        </div>
+        <div class='nav__ID'>
+            <span>Facilities</span>
+            <ul>
+                <li data-name=woolcock_operation_daily>Car Booking (Daily)</li>
+                <li data-name=woolcock_operation_weekly>Car Booking (Weekly)</li>
+                <li data-name=woolcock_operation_monthly>Car Booking (Monthly)</li>
+                <li data-name=woolcock_operation_booking_record>Car Rooking Records</li>
+                <li data-name=woolcock_operation_car_use_reimbursement_form>Car Use Reimbursement Form</li>
+            </ul>
+        </div>
+        <div class='nav__ID'>
+            <span>Laboratory</span>
+            <ul>
+                <li data-name=woolcock_operation_temperature>Temperature monitoring</li>
+                <li data-name=woolcock_operation_pc2_Induction_form data-s=1>PC2 Induction</li>
+                <li data-name=woolcock_operation_pc2_Induction>PC2 Induction Results</li>
+            </ul>
+        </div>
+        <div class='nav__ID'>
+            <span>Engineering</span>
+            <ul>
+                <li data-name=woolcock_operation_knowledge_base>Knowledge Base</li>
+            </ul>
+        </div>
+        <div class='nav__ID'>
+            <span>HR Setup</span>
+            <ul>
+                <li data-name=woolcock_operation_list_managers>Alert Email List - Managers</li>
+                <li data-name=woolcock_operation_list_it>Alert Email List - IT</li>
+                <li data-name=woolcock_operation_list_lab>Alert Email List - Lab</li>
+                <li data-name=woolcock_operation_list_pi>Alert Email List - Participant Interaction</li>
+                <li data-name=woolcock_operation_list_student>Alert Email List - Student</li>
+                <li data-name=woolcock_operation_list_clinic>Alert Email List - Clinic</li>
+                <li data-name=woolcock_operation_list_hr>Alert Email List - HR</li>
+            </ul>
+            <br>
+            <span>Facility Setup</span>
+            <ul>
+                <li data-name=woolcock_operation_car>Cars</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    //---------------------------------------------
+    var L=$vm.module_list,B=$vm.hosting_path+'/wappsystem/crc-backoffice';
+
+    //HR
+    L.woolcock_operation_new_appointment=            {table_id:'20000911',url:B+'/modules/hr/new_appointment.html',
+                                                            form_module:'woolcock_operation_new_appointment_form'
+                                                     };
+    L.woolcock_operation_new_appointment_form=       {table_id:'20000911',url:B+'/modules/hr/new_appointment.form.html',
+        list_managers_tid:'20002145',
+        list_student:'20008634',
+        list_it:'20002151',
+        list_lab:'20002152',
+        list_pi:'20002153',
+        list_clinic:'20002154',
+    };
+    L.woolcock_operation_staff_departure=            {table_id:'20008635',url:B+'/modules/hr/staff_departure.html',
+                                                            form_module:'woolcock_operation_staff_departure_form'
+                                                     };
+    L.woolcock_operation_staff_departure_form=       {table_id:'20008635',url:B+'/modules/hr/staff_departure.form.html'};
+    L.woolcock_operation_list_clinic=                {table_id:'20004672',url:B+'/modules/hr/alert_email_list.html'};
+    L.woolcock_operation_list_managers=              {table_id:'20002145',url:B+'/modules/hr/alert_email_list.html'};
+    L.woolcock_operation_list_it=                    {table_id:'20002151',url:B+'/modules/hr/alert_email_list.html'};
+    L.woolcock_operation_list_lab=                   {table_id:'20002152',url:B+'/modules/hr/alert_email_list.html'};
+    L.woolcock_operation_list_pi=                    {table_id:'20002153',url:B+'/modules/hr/alert_email_list.html'};
+    L.woolcock_operation_list_student=               {table_id:'20008634',url:B+'/modules/hr/alert_email_list.html'};
+    L.woolcock_operation_list_hr=                    {table_id:'20002154',url:B+'/modules/hr/alert_email_list.html'};
+
+
+    //Lab
+    L.woolcock_operation_temperature=                {table_id:'20007567',url:B+'/modules/laboratory/temperature_monitoring.html'};
+    L.woolcock_operation_pc2_Induction=              {table_id:'20002110',url:B+'/modules/laboratory/pc2_Induction.html',
+                                                            form_module:'woolcock_operation_pc2_Induction_form'
+                                                     };
+    L.woolcock_operation_pc2_Induction_form=         {table_id:'20002110',url:B+'/modules/laboratory/pc2_Induction_form.html'};
+
+    //Facilities
+    L.woolcock_operation_daily=                      {table_id:'20000908',url:B+'/modules/facilitiy/car_booking/calendar/daily.html',
+                                                            booking_record:'woolcock_operation_booking_record',
+                                                            car:'woolcock_operation_car',
+                                                     };
+    L.woolcock_operation_weekly=                     {table_id:'20000908',url:B+'/modules/facilitiy/car_booking/calendar/weekly.html',
+                                                            booking_record:'woolcock_operation_booking_record',
+                                                            daily:'woolcock_operation_daily'
+                                                     };
+    L.woolcock_operation_monthly=                    {table_id:'20000908',url:B+'/modules/facilitiy/car_booking/calendar/monthly.html',
+                                                            booking_record:'woolcock_operation_booking_record',
+                                                            daily:'woolcock_operation_daily'
+                                                     };
+    L.woolcock_operation_booking_record=             {table_id:'20000908',url:B+'/modules/facilitiy/car_booking/booking/booking_record.html'};
+    L.woolcock_operation_car=                        {table_id:'20000906',url:B+'/modules/facilitiy/car_booking/car/car.html'};
+    L.woolcock_operation_car_use_reimbursement_form= {table_id:'20000044',url:B+'/modules/facilitiy/car_booking/car/car_use_reimbursement_form.html'};
+
+
+    //Engineering
+    L.woolcock_operation_knowledge_base=             {table_id:'20000441',url:B+'/modules/engineering/knowledge_base.html'};
+    //---------------------------------------------
+    function F__ID(){
+        //---------------------------------------------
+        var content_slot=$vm.root_layout_content_slot;
+        VmInclude:__COMPONENT__/navigation/navigation.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //---------------------------------------------
+        $('#D__ID').on('load',function(){
+            _nav_name='CRC Data Entry';
+            _set_nav_link();
+            _set_permissions();
+        });
+        //---------------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/navigation/navigation.css
+    #D__ID{
+        background: url("__COMPONENT__/image/texture.png");
+    }
+</style>

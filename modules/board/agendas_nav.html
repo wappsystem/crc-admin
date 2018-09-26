@@ -1,0 +1,78 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Agenda,_Hidden|UID,Meeting date|Meeting_date,Time|Time,Location|Location,Attendees|Attendees,Comments|Comments";
+        //_fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete,";
+        //-------------------------------------
+        var loc="__COMPONENT__/wappsystem/crc-external/modules/images/Board_Green_small.png"
+        $('#icon__ID').attr("src",loc);
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+          $("#title__ID").text("Board Meeting");
+          $('#save__ID').hide();$('#new__ID').hide();_set_req(); _request_data();
+        })
+        $('#D__ID').on('back',function(){ $("#title__ID").text("Board Meeting");$('#save__ID').hide();$('#new__ID').hide();_set_req(); _request_data(); })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            var sql="with tb as (select Information,ID,UID,PUID,DateTime,Author from [TABLE-"+_db_pid+"] ) ";
+            sql+="select Information,ID,UID,PUID,DateTime,Author from tb order by ID desc";
+            _req={cmd:'query_records',db_pid:_db_pid,sql:sql}
+        }
+        _data_process=function(){
+/*          for(var i=0;i<_records.length;i++)
+          _records[i].Project_Number=($vm.vm['__ID'].op.project_number).replace(/_/g,' ')
+  */        //_records[i].Project_name=($vm.vm['__ID'].op.project_name).replace(/_/g,' ')
+        }
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+              case 'Meeting_date':
+              case 'Time':
+              case 'Location':
+              case 'Attendees':
+              case 'Comments':
+                  records[I].vm_readonly[field]=true;
+              break;
+
+              case '_Agenda':
+                  var agenda=(records[I].Meeting_date+' '+records[I].Location).replace(/ /g,'_');
+                  records[I].vm_custom[field]=true;
+                  if(_records[I].UID===undefined){return;}
+
+                  td.html("<u style='cursor:pointer'>Agenda</u>");
+                  td.find('u').on('click',function(){
+                      $vm.load_module_by_name('wappsystem_crc_backoffice_board_agendas', $vm.root_layout_content_slot,{'agenda_uid':records[I].UID,'agenda':agenda});                  });
+              break;
+          }
+        }
+        //-------------------------------------
+        _data_process=function(){
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){ //set issue and due date
+        };
+        //-------------------------------------
+        _before_submit=function(record,dbv){ //set client uid as puid
+        };
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

@@ -1,0 +1,129 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span><select id=YY__ID type=select></select></select>
+        <a id=query_data__ID >Load</a>
+    	<span class=tab__ID></span>
+    </div>
+    <table id=grid__ID>
+        <tr><th>Month</th><th>Update</th><th>Number of Result</th><th>Update Date</th><th>Updated by</th></tr>
+        <tr><td>Jan</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Feb</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Mar</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Apr</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>May</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Jun</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Jul</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Aug</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Sept</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Oct</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Nov</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+        <tr><td>Dec</td><td><button>Update</button></td><td class=v__ID></td><td class=v__ID></td><td class=v__ID></td></tr>
+    </table>
+</section>
+<script>
+function F__ID(){
+    //------------------------
+    VmInclude:__HOST__/common-code/grid/grid.js
+    VmInclude:__COMPONENT__/style/ease-in-out.js
+    //------------------------
+    var _module=$vm.module_list[$vm.vm['__ID'].name];
+    //------------------------
+    //year dropdown
+    var $List=$('#YY__ID');
+    var y=new Date().getFullYear();
+    for(var i=0;i<7;i++){
+        var txt=(y-i).toString();
+        $List.append(  $('<option></option>').val(txt).html(txt)  );
+    }
+    $List.val((y).toString());
+    //---------------------------------------------
+    $('#YY__ID').on('change',function(){
+        request_data();
+    })
+    //---------------------------------------------
+    $('#D__ID').on('load',function(){
+        request_data();
+    })
+    //---------------------------------------------
+    $('#query_data__ID').on('click',function(){
+        request_data();
+    })
+    //-------------------------------------
+    var records=[]
+    //---------------------------------------------
+    var request_data=function(){
+        $('#grid__ID').hide();
+        records=[];
+        var sql="select ID,V2,V3,DateTime,Author,Modified,MAuthor from [TABLE-"+_db_pid+"] where V1=@I1";
+        $VmAPI.request({data:{cmd:'query_records',sql:sql,i1:$('#YY__ID').val()},callback:function(res){
+            records=res.records;
+            $('#grid__ID td.v__ID').text('');
+            for(var i=0;i<records.length;i++){
+                var m=records[i].V2;
+                var Num=records[i].V3;
+                var Author=records[i].Author;
+                var MAuthor=records[i].MAuthor;
+                var DateTime=records[i].DateTime;
+                var Modified=records[i].Modified;
+                var modified_by=MAuthor; if(modified_by=='') modified_by=Author;
+                var updated_date=Modified; if(updated_date=='') updated_date=DateTime;
+
+                var tr=$('#grid__ID tr').eq(m)
+                tr.find('td').eq(2).text(Num)
+                tr.find('td').eq(3).text(updated_date)
+                tr.find('td').eq(4).text(modified_by)
+            }
+            $('#grid__ID').show();
+        }})
+    }
+    //-------------------------------------
+    $('#grid__ID button').on('click',function(){
+        var m=$(this).parent().parent().index();
+        var sql="with tb as(select ID,V3,DT2,DateTime,Author,Modified,MAuthor from [TABLE-"+_module.var.medical_services_import_tid+"] where DatePart(yy,DT2)=@I1 and DatePart(mm,DT2)=@I2 and V3<>0)";
+        sql+=" select Number=count(ID),V3 from tb group by V3";
+        $VmAPI.request({data:{cmd:'query_records',sql:sql,i1:$('#YY__ID').val(),i2:m.toString()},callback:function(res){
+            var record={},dbv={}
+            for(var i=0;i<res.records.length;i++){
+                var data_name=res.records[i].V3;
+                var clean_data_name='s_'+data_name.replace(/[|&;$%@"<>()+,]/g, "");
+                var data_value=res.records[i].Number;
+                record[clean_data_name]=data_value;
+            }
+            dbv['V1']=$('#YY__ID').val();
+            dbv['V2']=m.toString();
+            dbv['V3']=res.records.length;
+ //alert(JSON.stringify(record));
+ //alert(JSON.stringify(dbv));
+ //return;
+            var rid=0;
+            for(var i=0;i<records.length;i++){
+                if(records[i].V2==m){
+                    rid=records[i].ID;
+                    break;
+                }
+            }
+            if(rid==0){
+                var req={cmd:"add_record",db_pid:_db_pid.toString(),data:record,dbv:dbv};
+                $VmAPI.request({data:req,callback:function(res){
+                    request_data();
+                }});
+            }
+            else{
+                var req={cmd:"delete_record",rid:rid,db_pid:_db_pid.toString()};
+                $VmAPI.request({data:req,callback:function(res){
+                    var req={cmd:"add_record",db_pid:_db_pid.toString(),data:record,dbv:dbv};
+                    $VmAPI.request({data:req,callback:function(res){
+                        request_data();
+                    }});
+                }});
+            }
+        }})
+    })
+    //-------------------------------------
+}
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

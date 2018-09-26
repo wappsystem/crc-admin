@@ -1,0 +1,110 @@
+<section>
+    VmInclude:__COMPONENT__/toolbar/back_save.html
+	<form id=F__ID>
+        <table id=tb__ID style='width:700px;'>
+            <colgroup><col class=colA style='width:260px' /><col /></colgroup>
+            <tr><td colspan=2 class='header__ID'>Participant</td></tr>
+            <tr><td>Name</td><td data-id=Name ></td></tr>
+            <tr><td>ABN</td><td data-id=ABN ></td></tr>
+            <tr><td>Short form name</td><td data-id=Short_form_name ></td></tr>
+            <tr><td>Address</td><td data-id=Address></td></tr>
+            <tr><td>Primary Contact</td><td data-id=Primary_Contact></td></tr>
+            <tr><td>Primary Contact Email</td><td data-id=Primary_Email ></td></tr>
+            <tr><td>Primary Login Name</td><td data-id=Primary_Login ></td></tr>
+            <tr><td>Secondary Contact</td><td data-id=Secondary_Contact></td></tr>
+            <tr><td>Secondary Contact Email</td><td data-id=Secondary_Email ></td></tr>
+            <tr><td>Secondary Login Name</td><td data-id=Secondary_Login ></td></tr>
+<!--            <tr><td>Organisation Type</td><td><select name=Organisation_Type__ID id=Organisation_Type__ID >
+                <option value="">-</option>
+                <option value="State Government">State Government</option>
+                <option value="Industry/ Private">Industry/ Private</option>
+                <option value="University">University</option>
+                <option value="Australian Government">Australian Government</option>
+                <option value="Other">Other</option>
+            </select></td></tr>
+            <tr><td>Sub Type</td><td data-custom=1 data-id=Sub_Type ></td></tr>
+            <tr><td>SME, International or Individual</td><td>
+                <input name=SME_int_ind__ID id=SME_int_ind__ID type=radio value='SME'>SME&nbsp;&nbsp;&nbsp;
+                <input name=SME_int_ind__ID type=radio value='International' >International&nbsp;&nbsp;&nbsp;
+                <input name=SME_int_ind__ID type=radio value='Individual' >Individual&nbsp;&nbsp;&nbsp;
+                <input name=SME_int_ind__ID type=radio value='N/A' >N/A
+                </td></tr>
+            <tr><td>Is End User</td><td data-custom=1 data-id=xxxx ><input name=End_User__ID id=End_User__ID type=radio value='Yes'>Yes&nbsp;&nbsp;&nbsp;&nbsp;
+                <input name=End_User__ID type=radio value='No' >No</td></tr>
+            <tr><td>Participation Type</td><td data-custom=1 data-id=xxxx ><input name=Participation_Type__ID id=Participation_Type__ID type=radio value=Essential >Essential participant&nbsp;&nbsp;&nbsp;&nbsp;
+            <input name=Participation_Type__ID type=radio value='Third Party' >Third Party&nbsp;&nbsp;&nbsp;&nbsp;
+            <input name=Participation_Type__ID type=radio value=Other >Other
+            </td></tr>
+            <tr><td>Contributioner</td><td data-custom=1 data-id=xxxx ><input name=Cash_Contributer__ID id=Cash_Contributer__ID type=checkbox \>Cash&nbsp;&nbsp;&nbsp;&nbsp;
+            <input name=Inkind_Staff_Contributer__ID id=Inkind_Staff_Contributer__ID type=checkbox \>In Kind Staff&nbsp;&nbsp;&nbsp;&nbsp;
+            <input name=Inkind_Non_Staff_Contributer__ID id=Inkind_Non_Staff_Contributer__ID type=checkbox \>In Kind Non-Staff&nbsp;&nbsp;&nbsp;&nbsp;
+            </td></tr>
+        -->
+        </table>
+    </form>
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__COMPONENT__/grid/form.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            _init();
+            _field_process();
+            custom_field_process();
+        })
+        //----------------------------------
+        var custom_field_process=function(){
+            $('#tb__ID td[data-custom=1]').each(function(){
+                    var field=$(this).attr('data-id');
+                    switch(field){
+                        case "Participant":
+                            $(this).find("input[name='"+field+"']").val(_records[I].Participant);
+                            $(this).find("input[name='"+field+"_uid']").val(_records[I].Participant_uid);
+                        break;
+                        //Radio buttons
+                        case 'HPQ_15':
+                            $('#F__ID').find("input[name='"+field+"'][value='"+_records[I][field]+"']").prop('checked', true);
+                            $('#F__ID').find("input[name='"+field+"']").on('click',function(){
+                                _set_value(this.value,_records,I,field);
+                            })
+                        break;
+                        //Checkbox
+                        case 'HPQ_3CB':
+                            if(_records[I][field]=="1" || _records[I][field]=="True" || _records[I][field]=="on" ) $(this).prop('checked', true);
+                            $(this).on('click', function(){
+                                if($(this).prop("checked") == true)   _set_value("1",_records,I,field);
+                                else                                  _set_value("0",_records,I,field);
+                            });
+                        break;
+                        //Text
+                        case 'HPQ_1a_lenght':
+                            $(this).find("input").val(_records[I][field]);
+                            $(this).find("input").blur(function(){
+                                _records[I][field]=this.value;
+                            })
+                        break;
+                        // Select
+                        case 'HPQ_16':
+                            $(this).find('select').val(_records[I][field]);
+                            $(this).find('select').on('change',function(){
+                                _set_value($(this).val(),_records,I,field);
+                            })
+                        break;
+                    }
+
+                });
+            }
+        }
+        //-------------------------------------
+        _before_submit_form=function(){
+            return true;
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+VmInclude:__COMPONENT__/toolbar/toolbar.css
+VmInclude:__COMPONENT__/grid/form.css
+</style>

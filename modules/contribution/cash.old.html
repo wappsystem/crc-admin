@@ -1,0 +1,79 @@
+<section>
+    <div style='background:#ddd'><span id=title__ID></span></div>
+        VmInclude:__COMPONENT__/frame/excel_v2.html
+</section>
+<script>
+    function F__ID(){
+        var cash_contribution_pid=$vm.module_list[$vm.vm['__ID'].name][0];
+        var site_pid=$vm.module_list[$vm.vm['__ID'].name][4];
+        var project_pid=$vm.module_list[$vm.vm['__ID'].name][6];
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name][8];
+        $("#title__ID").text('Cash Contribution');
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__COMPONENT__/frame/excel_v2.js
+        //-------------------------------------
+        _fields="Participant No|Participant_uid,Participant,_Hidden|Project_ID_uid,Project|Project_name,Financial_Year,Quarter,Cash,Paid";
+        //_fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor";
+        //-------------------------------------
+        _table_process=function(table){
+            table.Participant_uid={readOnly:true};
+            table.Participant={type: 'autocomplete',trimDropdown:false,source:function (query, process){
+                var sqlB="with tb as (select Value=UID,Item=@('Short_form_name') from [FORM-"+participant_pid+"])";
+                sqlB+=" select top 10 Item,Value from tb where Item like '%'+@S1+'%' ";
+                $vm.read_record_auto({query:query,process:process,sql:sqlB,minLength:0,callback:function(nv){auto_uid=nv;}});
+            }};
+            table.Project_ID_uid={readOnly:true};
+            table.Project_name={type: 'autocomplete',trimDropdown:false,source:function (query, process){
+                var sqlB="with tb as (select Value=UID,Item=@('Project_name') from [FORM-"+project_pid+"])";
+                sqlB+=" select top 10 Item,Value from tb where Item like '%'+@S1+'%' ";
+                $vm.read_record_auto({query:query,process:process,sql:sqlB,minLength:0,callback:function(nv){auto_uid=nv;}});
+            }};
+            table.Financial_Year={type:'dropdown',source: ['FY1314','FY1415','FY1516','FY1617','FY1718','FY1819','FY1920']};
+            table.Quarter={type:'dropdown',source: ['1','2','3','4']};
+            table.Cash={type: 'numeric',format:'$ 0,0'};
+            table.Paid={type: 'numeric',format:'$ 0,0'};
+        }
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            _set_req(); _request_data();  })
+        //-------------------------------------
+        _pre_data_process=function (){
+        };
+        //-------------------------------------
+        _after_change=function(record,column){
+            var item="";
+            if(column==='Participant'){
+                record.Participant_uid=auto_uid[record.Participant];
+            }
+            if(column==='Project_name'){
+                record.Project_ID_uid=auto_uid[record.Project_name];
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if(record.Cash!=='') dbv.V1=record.Cash;
+            if(record.Project_ID_uid!=='') dbv.V2=record.Project_ID_uid;
+            if(record.Paid!=='') dbv.V3=record.Paid;
+            if(record.Financial_Year!=='') dbv.S1=record.Financial_Year;
+            if(record.Quarter!=='') dbv.S2=record.Quarter;
+            if(record.Participant!=='') dbv.S3=record.Participant;
+            if(record.Participant_uid!=='') dbv.PUID=record.Participant_uid;
+            return true;
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/toolbar/toolbar_for_excel.css
+    #D__ID{
+        font-size:14px;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+    #title__ID{
+        background-color:#ddd;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size:9pt;
+    }
+    .ui-autocomplete {  z-index: 9999 !important;   }
+
+</style>

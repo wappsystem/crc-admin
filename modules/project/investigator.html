@@ -1,0 +1,90 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",_Hidden|UID,Project No|Project_uid,Project|Project,Stream No|Stream_uid,Stream|Stream,Stf<br>No|Staff_uid,Principal Investigator|Staff,_Site_Investigators";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _fields_e="Project|Project,Stream|Stream,Staff No|Staff_uid,Principal Investigator|Staff,_Site_Investigators";
+        //-------------------------------------
+        var participant_pid=$vm.module_list['wappsystem_crc_backoffice_project_leader'].Participant;
+        var project_pid=$vm.module_list['wappsystem_crc_backoffice_project_leader'].Project;
+        var stream_pid=$vm.module_list['wappsystem_crc_backoffice_project_leader'].Stream;
+        var staff_pid=$vm.module_list['wappsystem_crc_backoffice_project_leader'].Staff;
+        //-------------------------------------
+        $("#title__ID").text('Project Investigators');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project_uid':
+                case 'Stream_uid':
+                case 'Staff_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Project':
+                    var sql="with tb as (select name=@('Project_ID'),value2=uid from [TABLE-"+project_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Stream':
+                    var sql="with tb as (select name=@('Stream_Name'),value2=uid from [TABLE-"+stream_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Staff':
+                var sql="with tb as (select value2=UID,name=@('First_name')+' '+@('Last_name') from [TABLE-"+staff_pid+"])";
+                //sql+=",part as (select UID,Item2='|'+@('Short_form_name') from [TABLE-"+participant_pid+"]) ";
+                //sql+=",tot as(select name=Item1+Item2,value2=UID from tb join part on tb.PUID=part.UID)";
+                sql+=" select top 10 name,value=name,value2 from tb where name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case '_Site_Investigators':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].UID===undefined) return;
+                    var html="<u style='cursor:pointer'>Site Investigators</u>";
+                    td.html(html);
+                    td.find('u').on('click',function(){
+                        $vm.load_module_by_name('wappsystem_crc_backoffice_project_investigator_site_investigator',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID});
+                    })
+                break;
+            }
+        }
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project':
+                case 'Stream':
+                case 'Staff':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if(record.Project_uid==='') dbv.V1='0';
+            else dbv.V1=record.Project_uid;
+            if(record.Stream_uid==='')  dbv.V2='0';
+            else dbv.V2=record.Stream_uid;
+            if(record.Staff_uid==='')  dbv.V3='0';
+            else dbv.V3=record.Staff_uid;
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

@@ -1,0 +1,58 @@
+<div id=home__ID>
+    <div id=b__ID>
+        <p style='color:red'>
+        WARNING!!! This application is running on a test server. All data entered can be seen by everyone!!!
+        <br>Don't enter any sensitive data on this test server. The data entered will be clean up regularly.
+        <p>
+        <br>
+        <p style='color:#888'>
+        Key:Ctrl + mouse:double click will show red border for each module.
+        <br>Key:Alt + mouse:double click on any module will show the source code of the module.
+        <p>
+    </div>
+</div>
+<script>
+    function F__ID(){
+        if($vm.server=="production"){ $('#b__ID').hide();}
+        $('#D__ID').on('back',function(){
+        	$('#home_page').triggerHandler('click');
+        })
+    }
+</script>
+<style>
+    #home__ID{
+        padding-top:160px;
+    }
+    #a__ID{
+        padding:30px;
+		margin:auto;
+		width:600px;
+        height:300px;
+		color: #fff;
+		font-size: 16px;
+        color:fff;
+		line-height: 28px;
+		font-weight: 400;
+		background: #222;
+        opacity:0.6;
+        border-radius: 25px;
+	}
+    #b__ID{
+        font-size:12px;
+        padding:10px;
+        position:absolute;
+        left:10px;
+        bottom:30px;
+        background: #222;
+        opacity:0.6;
+        border-radius: 5px;
+    }
+    @media all and (max-width: 768px), only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 1024px), only screen and (min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min-resolution: 192dpi) and (max-width: 1024px), only screen and (min-resolution: 2dppx) and (max-width: 1024px) {
+        #a__ID{
+            display:none;
+        }
+        #b__ID{
+            display:none;
+        }
+    }
+</style>

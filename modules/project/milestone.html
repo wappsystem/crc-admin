@@ -1,0 +1,93 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid_milestone.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        //_fields="Progress Report|_Form,_Hidden|UID,_Hidden|Project,_Hidden|Stream,Date|Milestone_ID,Milestone|Milestone_Name,Start_date,Completion_Date,Milestone_Status,Estimated to completion|Estimated_Completion,Update_Date,_Hidden|Justification,_Hidden|Action_Strategies,_Hidden|Risk,_Hidden|Impact_Milestones,_Hidden|Impact_output";
+        _fields="Project No|Project_uid,Project|Project,Stream No|Stream_uid,Stream|Stream,_Hidden|UID,Milestones Stage|Milestone_ID,_Hidden|Date,Milestone|Milestone_Name";//,Start_date,Completion_Date";
+        _fields+=",Milestone_Status,Estimated <br>to completion|Estimated_Completion,Progress Report|_Form,Update_Date,Updated_by,_Hidden|Justification,_Hidden|Action_Strategies,_Hidden|Risk,_Hidden|Impact_Milestones,_Hidden|Impact_output";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var project_pid=$vm.module_list['wappsystem_crc_backoffice_project_milestone'].Project;
+        var stream_pid=$vm.module_list['wappsystem_crc_backoffice_project_milestone'].Stream;
+        var update_pid=$vm.module_list['wappsystem_crc_backoffice_project_milestone'].Updates;
+        //-------------------------------------
+        $("#title__ID").text('Project Milestones');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            var sql="with tb as (select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1] where @('Project') like '%'+@S3+'%' and @('Stream') like '%'+@S5+'%'  ) ";
+            sql+="select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]  where @('Project') like '%'+@S3+'%' and @('Stream') like '%'+@S5+'%'";
+            //-------------------
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                alert(sql_where)
+                sql=sql.replace('RowNum between @I6 and @I7',sql_where);
+                sql_n+=" where "+sql_where;
+            }
+            //-------------------
+            _req={cmd:'query_records',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),s3:$('#project__ID').val(),s5:$('#stream__ID').val(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project_uid':
+                case 'Stream_uid':
+                case 'Milestone_Status':
+                case 'Estimated_Completion':
+                case 'Update_Date':
+                case 'Updated_by':
+                    records[I].vm_readonly[field]=true;
+                    td.css('color','#888');
+                break;
+                case 'Start_date':
+                case 'Completion_Date':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+                case 'Project':
+                    var sql="with tb as (select name=@('Project_ID'),value2=uid from [TABLE-"+project_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Stream':
+                    var sql="with tb as (select name=@('Stream_Name'),value2=uid from [TABLE-"+stream_pid+"] where PUID="+records[I]['Project_uid']+")";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+            }
+        }
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project':
+                case 'Stream':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if(record.Project_uid==='') dbv.V1='0';
+            else dbv.V1=record.Project_uid;
+            if(record.Stream_uid==='')  dbv.V2='0';
+            else dbv.V2=record.Stream_uid;
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

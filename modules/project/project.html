@@ -1,0 +1,56 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        $("#title__ID").text('Projects');
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",Project No|UID,Project ID|Project_ID,Stream List|_Stream,Project name|Project_name,Project_Number,Project Description|Project_Description,Commencement Date|Commencement_Date,Completion Date|Completion_Date,No real Project|No_Project";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _fields_e="Project ID|Project_ID,Project name|Project_name,Project Description|Project_Description,Commencement Date|Commencement_Date,Completion Date|Completion_Date,No real Project|No_Project";
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'UID':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Commencement_Date':
+                case 'Completion_Date':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                    break;
+                case '_Stream':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].UID===undefined) return;
+                    var html="<u style='cursor:pointer'>Stream List</u>";
+                    td.html(html);
+                    td.find('u').on('click',function(){
+                        $vm.load_module_by_name('wappsystem_crc_backoffice_project_stream',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID,project:records[I].Project_name});
+                    })
+                break;
+                case 'No_Project':
+                    td.html('<input type=checkbox />');
+                    VmInclude:__COMPONENT__/grid/field_checkbox.js
+                break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            dbv.B1='0'; if(record.No_Project=='1') dbv.B1='1';
+        };
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

@@ -1,0 +1,49 @@
+<section>
+    VmInclude:__COMPONENT__/wappsystem/CRC-backoffice/modules/frame/slider.html
+    VmInclude:__COMPONENT__/wappsystem/CRC-backoffice/modules/frame/header.html
+    VmInclude:__COMPONENT__/wappsystem/CRC-backoffice/modules/frame/header.m.html
+    VmInclude:__COMPONENT__/wappsystem/CRC-backoffice/modules/frame/content.html
+    VmInclude:__COMPONENT__/wappsystem/CRC-backoffice/modules/frame/footer.html
+</section>
+<script>
+    $vm.module_list.home        ={table_id:'',url:$vm.hosting_path+'/'+$vm.repository+'/modules/frame/home.html'};
+    $vm.module_list.navigation_data_entry ={table_id:'',url:$vm.hosting_path+'/'+$vm.repository+'/modules/navigation/navigation_data_entry.html'};
+    $vm.module_list.navigation_reports ={table_id:'',url:$vm.hosting_path+'/'+$vm.repository+'/modules/navigation/navigation_reports.html'};
+    $vm.module_list.navigation_board ={table_id:'',url:$vm.hosting_path+'/'+$vm.repository+'/modules/navigation/navigation_board.html'};
+    function F__ID(){
+        //------------------------------------
+        var on_load=function(){
+            _header_opacity_Home="0.8"
+            _header_opacity="0.8"
+            layout_resize();
+            login_changed();
+			var query = window.location.search.substring(1);
+            if(query=='redirect=crc_board'){
+                $vm.load_module_by_name('navigation_board',$vm.root_layout_content_slot,{});
+            }
+        };
+        //------------------------------------
+        VmInclude:__COMPONENT__/layout/main_layout_process.js
+        //------------------------------------
+    }
+</script>
+<style>
+    html,body{
+      	margin:0;
+      	padding:0;
+      	height:100%;
+      	width:100%;
+      	font: 14px Helvetica, Arial, sans-serif;
+    }
+    #mobile__ID{
+        display:none;
+    }
+    @media all and (max-width: 768px), only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 1024px), only screen and (min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min-resolution: 192dpi) and (max-width: 1024px), only screen and (min-resolution: 2dppx) and (max-width: 1024px) {
+        #desk__ID{
+            display:none;
+        }
+        #mobile__ID{
+            display:block;
+        }
+    }
+</style>

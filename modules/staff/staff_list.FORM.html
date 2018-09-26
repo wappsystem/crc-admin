@@ -1,0 +1,160 @@
+<section>
+    VmInclude:__COMPONENT__/toolbar/back_save_print.html
+	<form id=F__ID style='padding:30px'>
+        <table id=table_form__ID style='width:600px;'>
+            <colgroup><col class=colA style='width:160px' /><col /></colgroup>
+            <tr><td colspan=2 class='header__ID'>Add new Staff member</td></tr>
+            <tr style='display:none'><td>Select a Participant</td><td>
+            	<input name=Participant__ID  id=Participant__ID  type=text class=sel__ID />
+    			<input name=Participant_uid__ID id=Participant_uid__ID type=text readonly style="width:30px;color:#ccc;" />
+    			<u style='cursor:pointer;float:right;' id=Participant_r>Remove</u>
+    	    </td></tr>
+            <tr><td>First name</td><td><input name=First_name__ID id=First_name__ID type=text /></td></tr>
+            <tr><td>Last name</td><td><input name=Last_name__ID id=Last_name__ID type=text /></td></tr>
+            <tr><td>Category (MDQ 2.3)</td><td><select name=Category__ID id=Category__ID >
+                <option></option>
+                <option value="Technical/ Other">Technical/ Other</option>
+                <option value="Professional Research Staff">Professional Research Staff</option>
+                <option value="Post graduate students">Post graduate students</option>
+            </select></td></tr>
+            <tr><td>Role</td><td><input name=Role__ID id=Role__ID type=text /></td></tr>
+            <tr><td>Rate</td><td><select name=Rate__ID id=Rate__ID >
+                <option></option>
+                <option value="Program Leader">Program Lead/Senior Manager</option>
+                <option value="Key Researcher">Key Researcher/Manager/Staff/Theme Leader</option>
+                <option value="Researcher">Researcher/Professional</option>
+                <option value="Other">Other Support Staff</option>
+                <option value="Student">Student</option>
+            </select></td></tr>
+            <tr><td>Email</td><td><input name=Email__ID id=Email__ID type=text /></td></tr>
+            <tr><td>Phone</td><td><input name=Phone__ID id=Phone__ID type=text /></td></tr>
+            <tr><td>Address</td><td><textarea name=Address__ID id=Address__ID type=text ></textarea></td></tr>
+            <tr><td>Start Date</td><td><input name=Start_Date__ID id=Start_Date__ID type=text /></td></tr>
+            <tr><td>End Date</td><td><input name=End_Date__ID id=End_Date__ID type=text /></td></tr>
+            <tr><td colspan=2 class='subheader__ID'>Non Disclosure Agreement</td></tr>
+            <tr><td>NDA Signed</td><td><input name=NDG_Signed__ID id=NDG_Signed__ID type=checkbox /></td></tr>
+            <tr><td>Date Signed</td><td><input name=Date_Signed__ID id=Date_Signed__ID type=text /></td></tr>
+                <tr><td>NDA <i>(upload signed document)</i></td>
+                <td><input name=DocND__IDA id=DocNDA__ID type=text readonly='readonly' class=sel__ID />
+        		<u style='cursor:pointer' id=DocNDA_o__ID>open</u>&nbsp;
+        		<u style='cursor:pointer' id=DocNDA_r__ID>remove</u><br/>
+        		<input name=DocNDA_f__ID id=DocNDA_f__ID type=file onchange="javascript:eval(this.name.replace('_f','')).value=value.substring(value.lastIndexOf('\\')+1);" />
+        		</td></tr>
+        </table>
+    </form>
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__COMPONENT__/toolbar/back_and_print.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__COMPONENT__/wappsystem/crc-backoffice/common-code/grid/form.js
+        //-------------------------------------
+        $('#Date_Signed__ID').datepicker({dateFormat:'dd/mm/yy'});
+        $('#Start_Date__ID').datepicker({dateFormat:'dd/mm/yy'});
+        $('#End_Date__ID').datepicker({dateFormat:'dd/mm/yy'});
+        $("#DocNDA__ID").vm6('attach_file');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            clear_all();
+             $('#Address__ID').autogrow();
+             $('#Participant__ID').val($vm.vm['__ID'].op.site)
+             $('#Participant_uid__ID').val($vm.vm['__ID'].op.part_uid)
+             $('#Participant_puid__ID').val($vm.vm['__ID'].op.part_puid)
+        })
+        _before_submit=function(records,dbv){
+            if($('#Participant_uid__ID').val()!=='') {dbv.PUID=$('#Participant_uid__ID').val();dbv.V1=$('#Participant_uid__ID').val();}
+            else return false;
+            if($vm.vm['__ID'].op.part_pid!=='') dbv.PPID=$vm.vm['__ID'].op.part_pid;
+            else return false;
+            $vm.vm['__ID'].op.staff_name=$('#First_name__ID').val()+' '+$('#Last_name__ID').val();
+            return true;
+        };
+        var clear_all=function(){
+            $('#Participant__ID').val('');
+            $('#Participant_uid__ID').val('');
+            $('#First_name__ID').val('');
+            $('#Last_name__ID').val('');
+            $('#Category__ID').val('');
+            $('#Role__ID').val('');
+            $('#Rate__ID').val('');
+            $('#Email__ID').val('');
+            $('#Phone__ID').val('');
+            $('#Address__ID').val('');
+            $('#Start_Date__ID').val('');
+            $('#End_Date__ID').val('');
+            $('#NDG_Signed__ID').prop('checked',false)
+            $('#Date_Signed__ID').val('');
+            $('#DocND__IDA').val('');
+        }
+        //-------------------------------------
+        var _add_record=function(){
+            if(_row_data!=='' && _row_data!==false){
+                var req={cmd:"add_record",db_pid:_db_pid.toString(),data:_row_data,dbv:_dbv};
+                jQuery.ajaxSetup({async:false});
+                $vm.vm['__ID'].op.part_pid
+                $VmAPI.request({data:req,callback:function(res){
+                    $vm.vm['__ID'].op.staff_uid=res.uid;
+                }});
+                jQuery.ajaxSetup({async:true});
+                //$('#back__ID').trigger('click');
+            }
+        }
+    }
+</script>
+<style>
+VmInclude:__COMPONENT__/toolbar/toolbar.css
+VmInclude:__COMPONENT__/style/form.css
+.rb__ID{
+    font-size: 14px;
+    padding-left: 5px;
+    vertical-align:top!important;
+}
+.modified_radio__ID {
+    -webkit-appearance: none;
+    -moz-appearance: button;
+/*	background-color: #fafafa;*/
+    border: 1px solid #000;
+    width:14px;
+    height:18px;
+/*	box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);*/
+    padding: 3px;
+    border-radius: 3px;
+    display: inline-block;
+    position: relative;
+    opacity:0.15;
+}
+.modified_radio__ID:active, .modified_radio__ID:checked:active {
+    /*box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1);*/
+}
+
+.modified_radio__ID:checked {
+    -moz-appearance: button;
+    background-color: #888;
+    border: 1px solid #adb8c0;
+/*	box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05), inset 15px 10px -12px rgba(255,255,255,0.1);*/
+    color: #99a1a7;
+    opacity:0.9;
+}
+.modified_radio__ID:checked:after {
+    /*content: '\2714';*/
+    font-size: 14px;
+    position: absolute;
+    top: 0px;
+    left: 3px;
+    color: #99a1a7;
+}
+.modified_number__ID{
+    margin-left:-19px;
+    font-size:14pt;
+}
+
+.modified_radio__ID:active, .modified_radio__ID:checked:active {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1);
+}
+.modified_number__ID{
+    margin-left:-19px;
+    font-size:14pt;
+}
+
+</style>

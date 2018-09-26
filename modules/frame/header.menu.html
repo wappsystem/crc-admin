@@ -1,0 +1,38 @@
+<nav id=nav__ID>
+    <ul>
+        <li data-name=home id=home_page>Home</li>
+        <li data-name=navigation_data_entry>Project Management Data Entry</li>
+        <li data-name=navigation_reports>Project Management Reports</li>
+        <li data-name=navigation_board>Board Meetings</li>
+        <li id=signin__ID data-b='1'>Sign In</li>
+        <li id=signout__ID data-b='2'>Sign Out</li>
+    </ul>
+</nav>
+<style>
+    #nav__ID{
+        padding: 40px 80px 0 0;
+        margin:0;
+        float: right;
+        opacity: 1;
+        position: relative;
+    }
+    #nav__ID>ul{
+        list-style: none;
+        overflow: hidden;
+        float: left;
+    }
+    #nav__ID>ul:after {
+        content: ""; clear: both;
+        display: block;
+    }
+    #nav__ID>ul>li{
+        color:#000;
+        float: left;
+        margin-left: 50px;
+        white-space: nowrap;
+        cursor:pointer;
+    }
+    #nav__ID>ul>li:hover{
+        color:#f00;
+    }
+</style>

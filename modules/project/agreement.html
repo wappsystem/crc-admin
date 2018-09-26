@@ -1,0 +1,75 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",Project Number|Project_uid,Project|Project,Stream No|Stream_uid,Stream|Stream,Project Agreement|Document,Project Number|Project_Number,Version|Version";//,Section|Section";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        _fields_e="Project|Project,Project Agreement|Document,Project Number|Project_Number,Version|Version";//,Section|Section";
+        //-------------------------------------
+        var project_pid=$vm.module_list['wappsystem_crc_backoffice_project_agreement'].Project;
+        var section_pid=$vm.module_list['wappsystem_crc_backoffice_project_agreement'].Section;
+        var stream_pid=$vm.module_list['wappsystem_crc_backoffice_project_agreement'].Stream;
+        //-------------------------------------
+        $("#title__ID").text('Project Agreement');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project_uid':
+                case 'Stream_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Document':
+                    VmInclude:__COMPONENT__/grid/field_file.js
+                break;
+                case 'Section':
+                    var sql="with tb as (select name=@('Section'),value2=uid from [TABLE-"+section_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Project':
+                    var sql="with tb as (select name=@('Project_ID'),value2=uid from [TABLE-"+project_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+                case 'Stream':
+                    var sql="with tb as (select name=@('Stream_Name'),value2=uid from [TABLE-"+stream_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+            }
+        }
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Project':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+          dbv.PPID=project_pid;
+          if(record.Project_uid!=='') dbv.PUID=record.Project_uid;
+          if(record.Stream_uid!=='' && record.Stream_uid!==undefined) dbv.V1=record.Stream_uid;
+          return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

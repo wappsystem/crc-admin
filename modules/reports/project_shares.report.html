@@ -1,0 +1,138 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>Select project <select id=Project__ID type=select></select> Accumulated including <select id=YY__ID type=select></select>
+        <a id=query__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span>Project Shares
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+function F__ID(){
+    //------------------------
+    VmInclude:__COMPONENT__/toolbar/back.js
+    VmInclude:__HOST__/common-code/grid/grid.js
+    VmInclude:__COMPONENT__/style/ease-in-out.js
+    var participant_pid=$vm.module_list[$vm.vm['__ID'].name].Participant;
+    var cash_pid=$vm.module_list[$vm.vm['__ID'].name].cash;
+    var equipment_pid=$vm.module_list[$vm.vm['__ID'].name].equipment;
+    var staff_pid=$vm.module_list[$vm.vm['__ID'].name].Staff;
+    var other_pid=$vm.module_list[$vm.vm['__ID'].name].office;
+    var project_pid=$vm.module_list[$vm.vm['__ID'].name].Project;
+    var participant_project_pid=$vm.module_list[$vm.vm['__ID'].name].Participant_project;
+    var flow_through_pid=$vm.module_list[$vm.vm['__ID'].name].flow_through;
+    //------------------------
+    //FY dropdown
+    var $List2=$('#YY__ID');
+    $List2.append(  $('<option></option>').val("14").html('FY1314')  );
+    $List2.append(  $('<option></option>').val("15").html('FY1415')  );
+    $List2.append(  $('<option></option>').val("16").html('FY1516')  );
+    $List2.append(  $('<option></option>').val("17").html('FY1617')  );
+    $List2.append(  $('<option></option>').val("18").html('FY1718')  );
+    $List2.append(  $('<option></option>').val("19").html('FY1819')  );
+    $List2.append(  $('<option></option>').val("20").html('FY1920')  );
+    $List2.val();
+    //------------------------
+    var $List=$('#Project__ID');
+    sql="select project=@('Project_ID'),project_uid=UID from [TABLE-20003921] order by @('Project_ID')";
+    var req_data={cmd:'query_records',sql:sql};
+    $VmAPI.request({data:req_data,callback:function(res){
+        for(var i=0;i<res.records.length;i++){
+            var project=res.records[i].project;
+            var project_uid=res.records[i].project_uid;
+            $List.append(  $('<option></option>').val(project_uid).html(project))
+        }
+    }});
+    $List.val();
+    //---------------------------------------------
+    $('#Project__ID').on('change',function(){
+        //request_data();
+    })
+    //---------------------------------------------
+    $('#D__ID').on('load',function(){
+        //request_data();
+    })
+    //---------------------------------------------
+    $('#query_data__ID').on('click',function(){
+        //request_data();
+    })
+    //-------------------------------------
+    _fields="Participant|participant,_Hidden|pasigned,Cash|cash,Staff inkind|staff_inkind,Equipment|equipment,Other/Office Space|other,Flow_Through|follow,Total|total,Project Share|project_share";
+    $('#query__ID').on('click',function(){_set_req();})
+    //-------------------------------------
+    var request_num=0;
+    _set_req=function(){
+        var sql="with part as (select part_uid=UID,participant=@('Short_form_name') from [TABLE-"+participant_pid+"]) ";
+        sql+=",ft  as (select ftPUID=PUID,follow=sum(V1) from [TABLE-"+flow_through_pid+"] where V2=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by PUID) "; //V1 Amount
+        sql+=",ca  as (select PUID,cash=sum(V1) from [TABLE-"+cash_pid+"] where V2=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by PUID) "; //V1 Cash V3=Paid
+        sql+=",equ  as (select eqPUID=PUID,equipment=sum(V3) from [TABLE-"+equipment_pid+"] where V2=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by PUID) "; // V3 quarterly
+        sql+=",staff  as (select staffPUID=PUID,staff_inkind=sum(V2) from [TABLE-"+staff_pid+"] where V3=@I1 and B2<>'True' and CAST(RIGHT(S1,2) AS INT)<=@I2 group by PUID) ";
+        sql+=",oth  as (select othPUID=PUID,other=sum(V3) from [TABLE-"+other_pid+"] where V2=@I1 and CAST(RIGHT(S1,2) AS INT)<=@I2 group by PUID) "; // V3 quaterly
+//        sql+=",pan  as (select panPUID=PUID,bno=B1 from [TABLE-"+participant_project_pid+"] where V1=@I1 and B1='False') ";
+//        sql+=",pay  as (select payPUID=PUID,byes=B1 from [TABLE-"+participant_project_pid+"] where V1=@I1 and B1='True') ";
+//        sql+=",pa  as (select paPUID=payPUID,pasigned='Yes' from pay full join pan on panPUID=payPUID  where (byes=1 and  isnull(bno,1)=1 ) group by payPUID )";
+        sql+=" select participant,pasigned='Yes',follow,cash,equipment,staff_inkind,other from part ";
+        sql+=" left join ft on part_uid=ftPUID";
+        sql+=" left join ca on part_uid=PUID";
+        sql+=" left join equ on part_uid=eqPUID";
+        sql+=" left join staff on part_uid=staffPUID";
+        sql+=" left join oth on part_uid=othPUID";
+//        sql+=" left join pa on part_uid=paPUID";
+        sql+=" order by participant";
+        _req={cmd:'query_records',sql:sql,i1:$('#Project__ID').val(),i2:$('#YY__ID').val()};
+    }
+    _data_process=function(){
+        var total_sum=0;
+        var part_contribution=[];
+        for(var i=0;i<_records.length;i++){
+            if(_records[i].pasigned=='Yes') {
+                if(part_contribution[i]===undefined) part_contribution[i]=0;
+                if(_records[i].cash!=='') part_contribution[i]+=parseInt(_records[i].cash);
+                if(_records[i].equipment!=='') part_contribution[i]+=parseInt(_records[i].equipment)/2;
+                if(_records[i].staff_inkind!=='') part_contribution[i]+=parseInt(_records[i].staff_inkind)/2;
+                if(_records[i].other!=='') part_contribution[i]+=parseInt(_records[i].other/2);
+                if(_records[i].follow!=='' && _records[i].follow!==undefined) part_contribution[i]+=parseInt(_records[i].follow);
+            }
+            else part_contribution[i]=0;
+            total_sum+=part_contribution[i];
+            _records[i].total=part_contribution[i];
+
+        }
+        for(var i=0;i<_records.length;i++){
+            if(part_contribution[i]==0 && total_sum==0 ) {total_sum=1;}
+            _records[i].project_share=(100*part_contribution[i]/total_sum).toFixed(1);
+        }
+    }
+    //-------------------------------------
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+    });
+    //-------------------------------------
+    _cell_render=function(records,I,field,td,set_value,source){
+        switch(field){
+            case 'follow':
+            case 'cash':
+            case 'equipment':
+            case 'staff_inkind':
+            case 'other':
+            case 'total':
+                if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                if(records[I][field]!='0' && records[I][field]!='') td.html(formatter.format(records[I][field])); //add $ sign
+                else td.html('');
+                break;
+            case 'project_share':
+                if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                if(records[I][field]!='0.0' && records[I][field]!='') td.html(records[I][field]); //add $ sign
+                else td.html('');
+            break;
+        }
+    }
+}
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

@@ -1,0 +1,214 @@
+<section>
+<div style='background:#ddd'><span id=title__ID></span></div>
+      <div id=toolbar__ID>
+            <a id=back__ID>Back</a> <span id=ns__ID><a id=new__ID>Add New Entry</a> <a id=save__ID>Save Changes</a></span><span class=tab__ID></span><input placeholder='filter' id=keyword__ID type=text /> <a id=query__ID>Load (Refresh)</a> <a id=pv__ID >Print</a>
+            <span id=multi__ID>
+                <span class=tab__ID></span>Page Size: <select id=page_size__ID><option>30</option><option>50</option><option>100</option><option>200</option></select><span class=tab__ID></span>
+                <span id=I__ID style="display:none">0</span><span id=A__ID></span>
+                <img id=p__ID src="__COMPONENT__/image/p.png" ><img id=n__ID src="__COMPONENT__/image/n.png" >
+                <span class=tab__ID></span>Start page: <input id=start__ID type=text style="width:45px" />
+                Number of page: <input id=num__ID type=text  style="width:45px" />
+                <a id=export__ID>Export</a>
+            </span>
+            <span id=elapsed__ID style='float:right'></span>
+      </div>
+      <div id=pvdiv__ID>
+          <div id=excel_container__ID style='font-size:10pt;font-family: Helvetica, Arial, sans-serif;'>
+              <div id=excel__ID class='vm_excel_div' style='background-color:#fff'></div>
+              <div id=excel_follow_up__ID></div>
+          </div>
+      </div>
+</section>
+<script>
+    function F__ID(){
+        $('#pageheader__ID').text('Staff Inkind Contribution - Add/Modify/Confirm');
+        //-------------------------------------
+        //var _fields="Hidden|Participant_uid,Hidden|Participant,Hidden|Project_ID_uid,Project|Project_name,Hidden|Financial_Year,Hidden|Quarter,Hidden|Staff_uid,Staff,Rate Level|Rate,FTE,FTE Rate|Rate_Dollar,Quarterly<br>Inkind Value|Inkind,FTE<br>Previous<br>Quarter|FTE_P_Q,Confirmed,Hidden|Updated_by,Hidden|Updated_date,Hidden|Locked";
+        //_fields+=",Submit Date|DateTime,Hidden|Author,Hidden|Modified";
+        _fields="Participant No|Participant_uid,Participant,_Hidden|Project_ID_uid,Project|Project_name,Financial_Year,Quarter,";
+        _fields+="Contribution Type|Contribution_type,Location Address|Description,Area (m2)|Quantity,Cost per m2|Unit_Cost,Total Cost|Total_Cost,% CRC Use|CRC_Use,Value to CRC|CRC_value,Claims|Claim";
+        //_fields+=",Submit Date|DateTime,Hidden|Author,Hidden|Modified";
+
+        //-------------------------------------
+        VmInclude:__COMPONENT__/frame/excel_v2.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        var project_pid='';
+        var participant_pid='';
+        var part_uid="";
+        var auto_uid={}; // be filled by autocomplete
+        var lock_pid='';
+        var locked=false;
+        $('#D__ID').on('load',function(){
+            project_pid=$vm.module_list[$vm.vm['__ID'].name][4];
+            participant_pid=$vm.module_list[$vm.vm['__ID'].name][6];
+            lock_pid=$vm.module_list[$vm.vm['__ID'].name][8];
+            $vm.vm['__ID'].op.sql_where=" B2=1"
+            _set_req(); _request_data();
+        });
+        //-------------------------------------
+        $('#D__ID').on('back',function(){
+        });
+        //-------------------------------------
+        _before_change=function(changes,source){
+        };
+        //-------------------------------------
+
+        _table_process=function(table){
+            table.Participant_uid={readOnly:true};
+            table.Participant={type: 'autocomplete',trimDropdown:false,source:function (query, process){
+                var sqlB="with tb as (select Value=UID,Item=@('Short_form_name') from [FORM-"+participant_pid+"])";
+                sqlB+=" select top 10 Item,Value from tb where Item like '%'+@S1+'%' ";
+                $vm.read_record_auto({query:query,process:process,sql:sqlB,minLength:0,callback:function(nv){auto_uid=nv;}});
+            }};
+            table.Project_ID_uid={readOnly:true};
+            table.Project_name={type: 'autocomplete',trimDropdown:false,source:function (query, process){
+                var sqlB="with tb as (select Value=UID,Item=@('Project_name') from [FORM-"+project_pid+"])";
+                sqlB+=" select top 10 Item,Value from tb where Item like '%'+@S1+'%' ";
+                $vm.read_record_auto({query:query,process:process,sql:sqlB,minLength:0,callback:function(nv){auto_uid=nv;}});
+            }};
+            table.Financial_Year={type:'dropdown',source: ['FY1314','FY1415','FY1516','FY1617','FY1718','FY1819','FY1920']};
+            table.Quarter={type:'dropdown',source: ['1','2','3','4']};
+            table.Contribution_type={readOnly:true};
+            table.Quantity={type:'numeric'};
+            table.Unit_Cost={type:'numeric',format:'$ 0,000.00'};
+            table.Total_Cost={type:'numeric',format:'$ 0,000.00',readOnly:true};
+            table.CRC_Use={type:'numeric'};
+            table.CRC_value={type:'numeric',format:'$ 0,000.00',readOnly:true};
+            table.Claim={type:'numeric',format:'$ 0,000.00',readOnly:true};
+        }
+        //-------------------------------------
+        _after_change=function(record,column){
+            var item="";
+            if(column==='Participant'){
+                record.Participant_uid=auto_uid[record.Participant];
+            }
+            if(column==='Project_name'){
+                record.Project_ID_uid=auto_uid[record.Project_name];
+            }
+            if(column=='Quantity'){
+                if(record.Unit_Cost!==undefined & record.Quantity!==undefined){
+                   record.Total_Cost=(parseFloat(record.Unit_Cost)*parseFloat(record.Quantity)).toString();
+                }
+                if(record.Total_Cost!==undefined & record.CRC_Use!==undefined){
+                   record.CRC_value=(parseFloat(record.Total_Cost)*parseFloat(record.CRC_Use)/100).toString();
+                }
+                if(record.CRC_value!==undefined){
+                   record.Claim=(parseFloat(record.CRC_value)/4).toString();
+                }
+               $('#excel__ID').handsontable('render');
+            }
+            if(column=='Unit_Cost'){
+                if(record.Unit_Cost!==undefined & record.Quantity!==undefined){
+                   record.Total_Cost=(parseFloat(record.Unit_Cost)*parseFloat(record.Quantity)).toString();
+                }
+                if(record.Total_Cost!==undefined & record.CRC_Use!==undefined){
+                   record.CRC_value=(parseFloat(record.Total_Cost)*parseFloat(record.CRC_Use)/100).toString();
+                }
+                if(record.CRC_value!==undefined){
+                   record.Claim=(parseFloat(record.CRC_value)/4).toString();
+                }
+               $('#excel__ID').handsontable('render');
+            }
+            if(column=='Total_Cost'){
+                if(record.Unit_Cost!==undefined & record.Quantity!==undefined){
+                   record.Total_Cost=(parseFloat(record.Unit_Cost)*parseFloat(record.Quantity)).toString();
+                }
+                if(record.Total_Cost!==undefined & record.CRC_Use!==undefined){
+                   record.CRC_value=(parseFloat(record.Total_Cost)*parseFloat(record.CRC_Use)/100).toString();
+                }
+                if(record.CRC_value!==undefined){
+                   record.Claim=(parseFloat(record.CRC_value)/4).toString();
+                }
+               $('#excel__ID').handsontable('render');
+            }
+            if(column=='CRC_Use'){
+                if(record.Unit_Cost!==undefined & record.Quantity!==undefined){
+                   record.Total_Cost=(parseFloat(record.Unit_Cost)*parseFloat(record.Quantity)).toString();
+                }
+                if(record.Total_Cost!==undefined & record.CRC_Use!==undefined){
+                   record.CRC_value=(parseFloat(record.Total_Cost)*parseFloat(record.CRC_Use)/100).toString();
+                }
+                if(record.CRC_value!==undefined){
+                   record.Claim=(parseFloat(record.CRC_value)/4).toString();
+                }
+               $('#excel__ID').handsontable('render');
+            }
+            if(column=='Claim'){
+                if(record.Unit_Cost!==undefined & record.Quantity!==undefined){
+                   record.Total_Cost=(parseFloat(record.Unit_Cost)*parseFloat(record.Quantity)).toString();
+                }
+                if(record.Total_Cost!==undefined & record.CRC_Use!==undefined){
+                   record.CRC_value=(parseFloat(record.Total_Cost)*parseFloat(record.CRC_Use)/100).toString();
+                }
+                if(record.CRC_value!==undefined){
+                   record.Claim=(parseFloat(record.CRC_value)/4).toString();
+                }
+               $('#excel__ID').handsontable('render');
+            }
+        };
+            //-------------------------------------
+        _pre_data_process=function (){
+              $("#title__ID").text('Non Staff Inkind Office Space');
+        };
+        //-------------------------------------
+        var cv=function(v){
+            if(v==="True") return true;
+            else if(v==='1') return true;
+            else if(v==='on') return true;
+            else return false;
+        };
+
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            //For import from template
+            //---------------------------
+            record.Contribution_type='Office Space';
+            if(record.Claim!=='') dbv.V3=record.Claim;
+            if(record.CRC_value!=='') dbv.V1=record.CRC_value;
+            if(record.Financial_Year!=='') dbv.S1=record.Financial_Year;
+            if(record.Quarter!=='') dbv.S2=record.Quarter;
+            if(record.Participant!=='') dbv.S3=record.Participant;
+            if(record.Participant_uid!=='') dbv.PUID=record.Participant_uid;
+            if(record.Project_ID_uid!=='') dbv.V2=record.Project_ID_uid;
+            dbv.B2='1'; //office space
+            dbv.PPID=participant_pid;
+            return true;
+        };
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            $('#multi__ID').show();
+            if($vm.vm['__ID'].op.new!==undefined || ($vm.vm['__ID'].op.sql_where!==undefined && $vm.vm['__ID'].op.sql_where!=="") ){
+                $('#multi__ID').hide();
+            }
+            //-------------------
+            var sql="with tb as (select Information,ID,UID,B1,B2,S1,S2,PUID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1] )";
+            sql+="select Information,ID,UID,B1,B2,S1,S2,PUID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]";
+            //-------------------
+            if($vm.vm['__ID'].op.sql_where!==undefined && $vm.vm['__ID'].op.sql_where!==""){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                //$vm.vm['__ID'].op.sql_where=undefined;
+                sql=sql.replace('RowNum between @I6 and @I7',sql_where);
+                sql_n+=" where "+sql_where;
+            }
+            //-------------------
+            _req={cmd:'query_records',sql:sql,db_pid:_db_pid,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+
+
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/toolbar/toolbar_for_excel.css
+    #D__ID{
+        font-size:14px;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+    #title__ID{
+        background-color:#ddd;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size:9pt;
+    }
+</style>

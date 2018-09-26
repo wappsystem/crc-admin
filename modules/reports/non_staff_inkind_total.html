@@ -1,0 +1,88 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>Accumulated including: <select id=YY__ID type=select></select>
+        <a id=query__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span>Non Staff Inkind - Total
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+    function F__ID(){
+        //------------------------
+        VmInclude:__COMPONENT__/toolbar/back.js
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //------------------------
+        //FY dropdown
+        var $List2=$('#YY__ID');
+        $List2.append(  $('<option></option>').val("14").html('FY1314')  );
+        $List2.append(  $('<option></option>').val("15").html('FY1415')  );
+        $List2.append(  $('<option></option>').val("16").html('FY1516')  );
+        $List2.append(  $('<option></option>').val("17").html('FY1617')  );
+        $List2.append(  $('<option></option>').val("18").html('FY1718')  );
+        $List2.append(  $('<option></option>').val("19").html('FY1819')  );
+        $List2.append(  $('<option></option>').val("20").html('FY1920')  );
+        $List2.val();
+    	//---------------------------------------------
+        var _fields="FY,Contribution_Type,Total|Amount,Committed,Variance";
+        //-------------------------------------
+        var formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+        });
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            if(records[I].Sort=='05'){
+                td.parent().find('td').css('background-color','#aaa').css('font-weight','700');
+            }
+            switch(field){
+                case 'Amount':
+                case 'Committed':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                    td.html(formatter.format(records[I][field])); //add $ sign
+                break;
+                case 'Variance':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap').css('background-color','#aaa').css('font-weight','700');
+                    if(parseFloat(records[I][field])<0)  td.css('background-color','#ff0000')
+                    td.html(formatter.format(records[I][field])); //add $ sign
+                break;
+            }
+        }
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ _set_req();                  })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            //-------------------------------------
+            var no_ik_other_pid=$vm.module_list['wappsystem_crc_backoffice_reports_non_staff_inkind_other'].table_id;
+            var no_ik_equipment_pid=$vm.module_list['wappsystem_crc_backoffice_reports_non_staff_inkind_equipment'].table_id;
+            var part_pid=$vm.module_list['wappsystem_crc_backoffice_reports_participant'].table_id;
+            var no_ik_agree_pid=$vm.module_list['wappsystem_crc_backoffice_reports_non_staff_inkind_agreement'].table_id;
+            var sql=" with\
+                cont1 as (select [Contribution_Type]='Other',FY=@S1,Amount1=Sum(ISNULL(V3,'0')),j1=1 from [TABLE-"+no_ik_other_pid+"] where CAST(RIGHT(S1,2) AS INT)<=@I2 and @('Contribution_type')<>'Office Space'),\
+                cont2 as (select [Contribution_Type]='Office Space',FY=@S1,Amount2=Sum(ISNULL(V3,'0')),j2=1 from [TABLE-"+no_ik_other_pid+"] where CAST(RIGHT(S1,2) AS INT)<=@I2 and @('Contribution_type')='Office Space'),\
+                cont3 as (select [Contribution_Type]='Equipment',FY=@S1,Amount3=Sum(ISNULL(V3,'0')),j3=1 from [TABLE-"+no_ik_equipment_pid+"] where CAST(RIGHT(S1,2) AS INT)<=@I2 ),\
+                agree as (select FY=@S1,Committ=Sum(ISNULL(V1,'0')),j4=1 from [TABLE-"+no_ik_agree_pid+"] where CAST(RIGHT(S1,2) AS INT)<=@I2 ),\
+                conttot as (select [Contribution_Type]='Total', FY=@S1,Amount4=ISNULL(Amount1,'0')+ISNULL(Amount2,'0')+ISNULL(Amount3,'0'),Variance=(ISNULL(Amount1,'0')+ISNULL(Amount2,'0')+ISNULL(Amount3,'0')) - ISNULL(Committ,'0'),Committed=ISNULL(Committ,'0') from cont1 join cont2 on j1=j2 join cont3 on j1=j3 join agree on j1=j4) \
+                select [Contribution_Type],FY, Amount=cast(ISNULL(Amount1,'0') as numeric(10,2)),Sort='02',Variance=0,Committed=0 from cont1 \
+                union \
+                select [Contribution_Type],FY, Amount=cast(ISNULL(Amount2,'0') as numeric(10,2)),Sort='03',Variance=0,Committed=0 from cont2 \
+                union \
+                select [Contribution_Type],FY, Amount=cast(ISNULL(Amount3,'0') as numeric(10,2)),Sort='04',Variance=0,Committed=0 from cont3 \
+                union \
+                select [Contribution_Type],FY, Amount=cast(ISNULL(Amount4,'0') as numeric(10,2)),Sort='05',Variance,Committed from conttot \
+                order by Sort \
+                ";
+            //-------------------------------------
+            _req={cmd:'query_records',sql:sql,i2:$('#YY__ID').val(),s1:$('#YY__ID option:selected').text()};
+            //-------------------------------------
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

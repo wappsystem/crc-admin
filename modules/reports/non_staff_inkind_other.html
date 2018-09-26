@@ -1,0 +1,60 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>Financial Year: <select id=YY__ID type=select>
+            <option>FY1314</option>
+            <option>FY1415</option>
+            <option>FY1516</option>
+            <option>FY1617</option>
+            <option>FY1718</option>
+            <option>FY1819</option>
+            <option>FY1920</option>
+        </select>
+        <a id=query__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span>Contribution Non Inkind Other
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+    function F__ID(){
+        //------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //------------------------
+        //number dropdown
+        $('#YY__ID').on('change',function(){ set_sql(); get_data(); });
+    	//---------------------------------------------
+        var _fields="Participant,Amount,FY";
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Amount':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                    td.html('$ '+parseFloat(records[I][field]).toFixed(2) ); //add $ sign
+                break;
+            }
+        }
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ _set_req(); _request_data();                  })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            //-------------------------------------
+            var no_ik_office_pid=$vm.module_list['wappsystem_crc_backoffice_reports_non_staff_inkind_other'].table_id;
+            var part_pid=$vm.module_list['wappsystem_crc_backoffice_reports_participant'].table_id;
+            var sql=" with\
+                part as (select Participant=@('Short_form_name'),UID from [TABLE-"+part_pid+"]),\
+                cont as (select PUID, Amount=cast( Sum(V3) as numeric(10,2) ) from [TABLE-"+no_ik_office_pid+"] where S1=@S1 and @('Contribution_type')<>'Office Space' group by PUID )\
+                select Participant,FY=@S1,Amount=ISNULL(Amount,'0.00') from part left join cont on UID=PUID order by Participant\
+                ";
+            //-------------------------------------
+            _req={cmd:'query_records',sql:sql,s1:$('#YY__ID').val()};
+            //-------------------------------------
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

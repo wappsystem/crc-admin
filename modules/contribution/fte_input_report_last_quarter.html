@@ -1,0 +1,86 @@
+<section>
+    <div style='background:#ddd'><span id=title__ID></span></div>
+      <div id=toolbar__ID>
+            <a id=back__ID>Back</a>
+            &nbsp;Financial Year:&nbsp;<select id=FY__ID >
+              <option value='FY1314'>FY 13/14</option>
+              <option value='FY1415'>FY 14/15</option>
+              <option value='FY1516'>FY 15/16</option>
+              <option value='FY1617'>FY 16/17</option>
+              <option value='FY1718'>FY 17/18</option>
+              <option value='FY1819'>FY 18/19</option>
+              <option value='FY1920'>FY 19/20</option>
+            </select>
+            &nbsp;Quarter:&nbsp;<select id=Q__ID >
+              <option value='1'>Quarter 1</option>
+              <option value='2'>Quarter 2</option>
+              <option value='3'>Quarter 3</option>
+              <option value='4'>Quarter 4</option>
+             </select>
+            <a id=query__ID>Query</a> <a id=pv__ID >Print</a>
+            <span id=multi__ID>
+                <span class=tab__ID></span>Page Size: <select id=page_size__ID><option>30</option><option>50</option><option>100</option><option>200</option></select><span class=tab__ID></span>
+                <span id=I__ID style="display:none">0</span><span id=A__ID></span>
+                <img id=p__ID src="https://cbs.wappsystem.com/system/images/p.png" ><img id=n__ID src="https://cbs.wappsystem.com/system/images/n.png" >
+                <span style='display:none'><span class=tab__ID></span><a id=Import__ID>Import</a><input id=Import_f__ID type=file style='display:none' /> <span id=ImportNum__ID></span></span>
+                <span class=tab__ID></span>Start page: <input id=start__ID type=text style="width:45px" />
+                Number of page: <input id=num__ID type=text  style="width:45px" />
+                <a id=export__ID>Export</a>
+            </span>
+            <span id=elapsed__ID style='float:right'></span>
+      </div>
+      <div id=pvdiv__ID>
+          <div id=excel_container__ID style='font-size:10pt;font-family: Helvetica, Arial, sans-serif;'>
+              <div id=excel__ID class='vm_excel_div' style='background-color:#fff'></div>
+          </div>
+      </div>
+</section>
+<script>
+function F__ID(){
+        var inkind_fte_pid=$vm.module_list[$vm.vm['__ID'].name][0];
+        var participant_pid=$vm.module_list[$vm.vm['__ID'].name][3];
+        $("#title__ID").text('Generate current quarter FTE for import based on previous quarter');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            $("#elapsed__ID").text('');
+        });
+      //-------------------------------------
+      var name='Last Quarter FTE';
+      //-------------------------------------
+      _fields="Participant No|Paricipant_uid,Participant,_Hidden|Project_ID_uid,Project,Financial_Year,Quarter,Staff No|Staff_uid,Staff,Rate Level|Rate,FTE,FTE Previous Quarter|FTE_P_Q";
+      //-------------------------------------
+      var fy=$('#FY__ID').val();
+      var quarter=$('#Q__ID').val();
+      var sql_n='';
+      var sql_g='';
+      var update_query=function(){
+          fy=$('#FY__ID').val();
+          quarter=$('#Q__ID').val();
+          if(parseInt(quarter)<4) quarter=(parseInt(quarter)+1).toString();
+          else {quarter='1';fy='FY'+(parseInt(fy.substr(2,2))+1).toString()+(parseInt(fy.substr(4,2))+1).toString();}
+          var sql0="with tb as (select ID,[Paricipant_uid]=@('Participant_uid') ,[Participant]=@('Participant'),[Project_ID_uid]=@('Project_ID_uid'),[Project]=@('Project_name'),[Financial_Year]='"+fy+"',[Quarter]='"+quarter+"',[Staff_uid]=@('Staff_uid'),[Staff]=@('Staff'),Rate=@('Rate'),FTE_P_Q=@('FTE'),FTE='0.0',[Rate_Dollar]=@('Rate_Dollar'),RowNum=row_number() over (order by ID) from [FORM-"+inkind_fte_pid+"]";
+          sql0+=" where @('Financial_Year')=@S1 and @('Quarter')=@S2) ";
+          sql_n=sql0+" select count (ID) from tb ";
+          sql_g=sql0;
+          sql_g=sql_g+" select * from tb  where RowNum between @I6 and @I7";
+      }
+      //-------------------------------------
+      VmInclude:__COMPONENT__/style/ease-in-out.js
+      VmInclude:__COMPONENT__/wappsystem/CRC-backoffice/modules/query_data_with_paging.js
+      //-------------------------------------
+     //-------------------------------------
+//      columns[4]={data:'Cash',type: 'numeric',format:'$ 0,0',readOnly:true};
+//      columns[5]={data:'Paid',type: 'numeric',format:'$ 0,0',readOnly:true};
+     // columns[9]={data:'Confirmed',type:'checkbox',readOnly:true};
+      //-------------------------------------
+}
+</script>
+<style>
+    VmInclude:__COMPONENT__/toolbar/toolbar_for_excel.css
+    #D__ID{
+        font-size:14px;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+    .ui-autocomplete {  z-index: 9999 !important;   }
+
+</style>

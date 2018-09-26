@@ -1,0 +1,180 @@
+<div id=D__ID>
+    <div>
+        <div id=toolbar__ID>
+            <!--<a id=back__ID>Back</a><span class=tab__ID></span>-->
+            <span id=nav_link__ID></span>
+        </div>
+        <div style='clear:left;'>
+          <div class='nav__ID'>
+              <span><b>Participant</b></span>
+               <ul>
+                   <li data-name=wappsystem_crc_backoffice_reports_participant_contact_details>Contact Details</li>
+              </ul>
+              <br><span><b>Agreement</b></span>
+              <ul>
+              </ul>
+              <br><span><b>Project</b></span>
+              <li data-name=wappsystem_crc_backoffice_reports_project_shares>Project Shares</li>
+              <li data-name=wappsystem_crc_backoffice_reports_participant_project_contributiont>Participant Project Contribution</li>
+              <li data-name=wappsystem_crc_backoffice_reports_participant_project_sign_off>Participant's Sign Off</li>
+              <!--          <li data-name=wappsystem_crc_backoffice_reports_staff_inkind>Summary Staff Inkind</li>
+              <li data-name=wappsystem_crc_backoffice_reports_cash>Summary Cash</li>
+              <li data-name=wappsystem_crc_backoffice_reports_equipment>Summary Equipment</li>
+              <li data-name=wappsystem_crc_backoffice_reports_other>Summary Offce Space and Other</li> -->
+              <ul>
+              </ul>
+              <br><span><b>Contribution</b></span>
+              <ul>
+                    <span><i>Cash</i></span>
+                    <li data-name=wappsystem_crc_backoffice_reports_cash_full>Overview</li>
+                    <li data-name=wappsystem_crc_backoffice_reports_cash_total>Summary</li>
+                    <span><i>Staff Inkind</i></span>
+                    <li data-name=wappsystem_crc_backoffice_reports_staff_inkind_full>Overview</li>
+                    <li data-name=wappsystem_crc_backoffice_reports_staff_inkind_total>Summary</li>
+                    <span><i>Non Staff Inkind</i></span>
+                    <li data-name=wappsystem_crc_backoffice_reports_non_staff_inkind_full>Overview</li>
+                    <li data-name=wappsystem_crc_backoffice_reports_non_staff_inkind_total>Summary</li>
+                    <!--                <li data-name=wappsystem_crc_backoffice_reports_non_staff_inkind_agreement>As per Commonwealth Agreement</li>
+                    <li data-name=wappsystem_crc_backoffice_reports_non_staff_inkind_equipment>Equipment</li>
+                    <li data-name=wappsystem_crc_backoffice_reports_non_staff_inkind_office_space>Office Space</li>
+                    <li data-name=wappsystem_crc_backoffice_reports_non_staff_inkind_other>Other</li>
+                -->
+               </ul>
+           </div>
+           <div class='nav__ID'>
+               <span><b>Updates</b></span>
+                 <ul>
+                     <li data-name=wappsystem_crc_backoffice_reports_updates_project_milestones>Project Milestones</li>
+                     <li data-name=wappsystem_crc_backoffice_reports_updates_project_deliverables>Project Deliverables</li>
+                     <li data-name=wappsystem_crc_backoffice_reports_updates_commonwealth_milestones>Commonwealth milestones</li>
+                </ul>
+                <br>
+                <span><b>Activities Add/Modified Records</b></span>
+                  <ul>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity>Activity</li>
+                      <!--                  <li data-name=wappsystem_crc_backoffice_reports_activity_project>Project</li>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity_project_milestones>Project Milestones</li>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity_project_milestones_update>Project Milestone Updates</li>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity_project_deliverables>Project Deliverables</li>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity_commonwealth_milestones>Commonwealth Milestones</li>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity_research_program>Research Programs</li>
+                      <li data-name=wappsystem_crc_backoffice_reports_activity_support_queries>Support Queries</li> -->
+                 </ul>
+            </div>
+        </div>
+    <script>
+        //---------------------------------------------
+        /*
+        var L=$vm.module_list,B=$vm.hosting_path+'/wappsystem/crc-backoffice';
+
+        L.wappsystem_crc_backoffice_reports_participant={table_id:'20003941',url:B+'/modules/participant/participant.html'};//,form_module:'wappsystem_crc_backoffice_participant_form'};
+        L.wappsystem_crc_backoffice_reports_participant_contact_details={table_id:'20010706',url:B+'/modules/reports/participant_details.html'};//,form_module:'wappsystem_crc_backoffice_participant_form'};
+
+        L.wappsystem_crc_backoffice_reports_cash_contribution={table_id:'20004767',url:B+'/modules/reports/cash.html',Site:'20007829',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_cash_agreement={table_id:'20004706',url:B+'/modules/reports/cash_agreement.html',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_staff_inkind={table_id:'20004766',url:B+'/modules/reports/staff_inkind.html',Project:'20003921',Participant:'20003941',Staff:'20004600',Rate:'20004763'};
+        L.wappsystem_crc_backoffice_reports_staff_inkind_agreement={table_id:'20004761',url:B+'/modules/reports/staff_inkind_agreement.html',Project:'20003921',Participant:'20003941',Rate:'20004763'};
+        L.wappsystem_crc_backoffice_reports_staff_inkind_full={table_id:'20010706',url:B+'/modules/reports/staff_inkind_full.html',inkind:'20004766',inkind_agreement:'20004761',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_staff_inkind_total={table_id:'20010706',url:B+'/modules/reports/staff_inkind_total.html',inkind:'20004766',inkind_agreement:'20004761',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_cash_full={table_id:'20010706',url:B+'/modules/reports/cash_full.html',cash:'20004767',cash_agreement:'20004706',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_cash_total={table_id:'20010706',url:B+'/modules/reports/cash_total.html',cash:'20004767',cash_agreement:'20004706',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_project_shares={table_id:'20009721',url:B+'/modules/reports/project_shares.report.html',Participant:'20003941',Project:'20003921',cash:'20004767',equipment:'20008274',office:'20004776',Staff:'20004766',Participant_project:'20007811',flow_through:'20011489'};
+        L.wappsystem_crc_backoffice_reports_staff_inkind={table_id:'20009721',url:B+'/modules/reports/staff_inkind_actual.report.html'};
+        L.wappsystem_crc_backoffice_reports_cash={table_id:'20009722',url:B+'/modules/reports/cash_summary.report.html'};
+        L.wappsystem_crc_backoffice_reports_other={table_id:'20009723',url:B+'/modules/reports/other_summary.report.html'};
+        L.wappsystem_crc_backoffice_reports_equipment={table_id:'20009724',url:B+'/modules/reports/equipment_summary.report.html'};
+        L.wappsystem_crc_backoffice_report_participant_project={table_id:'20007811',url:B+'/modules/participant/project.html'};//,form_module:'wappsystem_crc_backoffice_paticipant_project_form'};
+        L.wappsystem_crc_backoffice_reports_participant_project_contributiont={table_id:'20009722',url:B+'/modules/reports/project_shares_participant.report.html',Participant:'20003941',Project:'20003921',cash:'20004767',equipment:'20008274',office:'20004776',Staff:'20004766',Participant_project:'20007811',flow_through:'20011489'};
+        L.wappsystem_crc_backoffice_reports_participant_project_sign_off={table_id:'20007811',url:B+'/modules/reports/project_sign_off.html',Participant:'20003941',Project:'20003921',Participant_project:'20007811'};
+
+        L.wappsystem_crc_backoffice_reports_non_staff_inkind_equipment={table_id:'20008274',url:B+'/modules/reports/non_staff_inkind_equipment.html',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_non_staff_inkind_office_space={table_id:'20004776',url:B+'/modules/reports/non_staff_inkind_office_space.html',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_non_staff_inkind_other={table_id:'20004776',url:B+'/modules/reports/non_staff_inkind_other.html',Project:'20003921',Participant:'20003941',item:'20004855'};
+        L.wappsystem_crc_backoffice_reports_non_staff_inkind_agreement={table_id:'20004760',url:B+'/modules/reports/non_staff_inkind_agreement.html',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_non_staff_inkind_total={table_id:'20010706',url:B+'/modules/reports/non_staff_inkind_total.html',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_reports_non_staff_inkind_full={table_id:'20010706',url:B+'/modules/reports/non_staff_inkind_full.html',Project:'20003921',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_commonwealth_milestone_programmes={table_id:'20004861',url:B+'/modules/commonwealth/programmes.html',Staff:'20004600',Participant:'20003941'};
+        L.wappsystem_crc_backoffice_commonwealth_milestone_programme_output={table_id:'20004862',url:B+'/modules/commonwealth/programmes_output.html',Programmes:'20004861'};
+        L.wappsystem_crc_backoffice_commonwealth_milestone_themes={table_id:'20005232',url:B+'/modules/commonwealth/programmes_themes.html',Staff:'20004600',Participant:'20003941',Programmes:'20004861'};
+        L.wappsystem_crc_backoffice_commonwealth_milestone_milestones={table_id:'20004605',url:B+'/modules/commonwealth/milestones.html',Output:'20004862',Theme:'20005232',Research_Program:'20004861'};
+        L.wappsystem_crc_backoffice_commonwealth_milestone_milestones_progress={table_id:'20007723',url:B+'/modules/commonwealth/milestones_progress.html',Project:'20003921',Participant:'20003941'};
+
+        L.wappsystem_crc_backoffice_reports_updates_project_milestones={table_id:'20003942',url:B+'/modules/reports/project_milestone.html'};
+        L.wappsystem_crc_backoffice_reports_updates_project_deliverables={table_id:'20009287',url:B+'/modules/reports/project_deliverables.html'};
+        L.wappsystem_crc_backoffice_reports_updates_commonwealth_milestones={table_id:'20009547',url:B+'/modules/reports/commonwealth_milestones.html'};
+
+        L.wappsystem_crc_backoffice_reports_activity={table_id:'20003942',url:B+'/modules/reports/activity.html'};
+        L.wappsystem_crc_backoffice_reports_activity_project={table_id:'20003921',url:B+'/modules/reports/activity_project.html'};
+        L.wappsystem_crc_backoffice_reports_activity_project_milestones={table_id:'20003942',url:B+'/modules/reports/activity_project_milestone.html'};
+        L.wappsystem_crc_backoffice_reports_activity_project_milestones_update={table_id:'20003942',url:B+'/modules/reports/activity_project_milestone_update.html'};
+        L.wappsystem_crc_backoffice_reports_activity_project_deliverables={table_id:'20009287',url:B+'/modules/reports/activity_project_deliverables.html'};
+        L.wappsystem_crc_backoffice_reports_activity_commonwealth_milestones={table_id:'20009547',url:B+'/modules/reports/activity_commonwealth_milestones.html'};
+        L.wappsystem_crc_backoffice_reports_activity_research_program={table_id:'20004861',url:B+'/modules/reports/activity_research_program.html'};
+        L.wappsystem_crc_backoffice_reports_activity_support_queries={table_id:'20010704',url:B+'/modules/reports/activity_support_queries.html'};
+
+        L.wappsystem_crc_backoffice_students={table_id:'20005330',url:B+'/modules/students/student.html'};
+        L.wappsystem_crc_backoffice_students_documents={table_id:'20005331',url:B+'/modules/students/documents.html',Students:'20005330'};
+        L.wappsystem_crc_backoffice_participant_setup={table_id:'20007829',url:B+'/modules/setup/participant_setup.html',Participant:'20003941'};
+        //---------------------------------------------
+        */
+        function F__ID(){
+            /*
+            //---------------------------------------------
+            var content_slot=$vm.root_layout_content_slot;
+            Vm Include:__COMPONENT__/navigation/navigation.js
+            Vm Include:__COMPONENT__/style/ease-in-out.js
+            //---------------------------------------------
+            $('#D__ID').on('load',function(){
+                _nav_name='CRC Reports';
+                _set_nav_link();
+                _set_permissions();
+            });
+            //---------------------------------------------
+            */
+            $('.nav__ID li').on('click',function(e){
+                var m=$(this).attr('data-name');
+                if(m!=undefined){
+                    e.preventDefault();
+                    $vm.load_module_v2(m,'',{});
+                }
+            })
+        }
+    </script>
+    <style>
+        VmInclude:__COMPONENT__/navigation/navigation.css
+        #D__ID{
+            background: url("__COMPONENT__/image/texture.png");
+        }
+        #toolbar__ID *{
+            margin:0;
+            padding:0;
+            vertical-align:middle;
+        }
+        #toolbar__ID{
+            padding:6px;
+            background-color:#ddd;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size:11pt;
+            border-bottom: 1px solid #aaa;
+        }
+        #toolbar__ID a{
+            background-color:#697b7b;
+            border:0px solid #18ab29;
+            display:inline-block;
+            cursor:pointer;
+            color:#ffffff;
+            font: 9pt/30px Arial;
+            padding-left:15px;
+            padding-right:15px;
+            text-decoration:none;
+            text-shadow:1px 1px 0px #2f6627;
+            -moz-border-radius:8px;
+            -webkit-border-radius:8px;
+            border-radius:8px;
+            transition: all 0.2s ease-in-out;
+        }
+        #toolbar__ID a:hover {
+          background-color:#525959;
+        }
+    </style>
+</div>

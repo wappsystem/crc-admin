@@ -1,0 +1,69 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="Full Name|Name,Address|Address,Primary Contact|Primary_Contact,Email|Primary_Email,Secondary Contact|Secondary_Contact,Email|Secondary_Email";
+        //_fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete,";
+        //-------------------------------------
+        $("#title__ID").text("Participant's Contact Details");
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Name':
+                case 'Address':
+                case 'Primary_Contact':
+                case 'Primary_Email':
+                case 'Secondary_Contact':
+                case 'Secondary_Email':
+                    records[I].vm_readonly[field]=true;
+                break;
+            }
+        }
+        //-------------------------------------
+        _data_process=function(){
+/*            for(var i=0;i<_records.length;i++){
+                if(_records[i].Total_Payment===undefined) _records[i].Total_Payment=0;
+                if(_records[i].Total_Amount===undefined) _records[i].Total_Amount=0;
+                _records[i].Balance=parseFloat(_records[i].Total_Payment)-parseFloat(_records[i].Total_Amount);
+                _records[i].Invoice_Number=_records[i].UID;
+            }
+*/        };
+        //-------------------------------------
+        _new_pre_data_process=function(){ //set issue and due date
+/*            _records[0].Issue_Date=$vm.date_to_string_dmy($vm.date_today());
+            _records[0].Due_Date=$vm.date_to_string_dmy($vm.date_today());
+            _records[0].GST_Amount=0;
+            _records[0].Total_Amount=0;
+            _records[0].Total_Payment=0;
+            _records[0].Balance=0;
+*/        };
+        //-------------------------------------
+        _before_submit=function(record,dbv){ //set client uid as puid
+/*            if(record.Client_uid!==undefined) dbv.PUID=record.Client_uid;
+            return true;
+*/        };
+        //-------------------------------------
+        $('#D__ID').on('load',function(){$('#new__ID').hide();$('#save__ID').hide();  _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){  _set_req(); _request_data(); })
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

@@ -1,0 +1,84 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",_Hidden|Program_uid,Program|Program,Output,Output Delivery Date,Milestone,Milestone Delivery Date,Is Active,Achieved,Remark,Strategies,Latest_Version,Remark";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var program_pid=$vm.module_list['wappsystem_crc_backoffice_commonwealth_milestone_milestones_new'].Research_Program;
+        //-------------------------------------
+        $("#title__ID").text('Commonwealth Milestones');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Program_uid':
+                case 'Output_uid':
+                case 'Theme_uid':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Output_Delivery_Date':
+                case 'Milestone_Delivery_Date':
+                    VmInclude:__COMPONENT__/grid/field_date.js
+                break;
+                case 'Is_Active':
+                case 'Latest_Version':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >No</option>\
+                    <option >Yes</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Achieved':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >No</option>\
+                    <option >Partial</option>\
+                    <option >Yes</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Program':
+                    var sql="with tb as (select name=@('Research_Program_name'),value2=uid from [TABLE-"+program_pid+"])";
+                    sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                    VmInclude:__COMPONENT__/grid/field_auto.js
+                break;
+            }
+        }
+        _after_change=function(records,I,field,td,set_value,source){
+          switch(field){
+              case 'Program':
+                  _render(I);
+                  break;
+          }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if(record.Milestone_Delivery_Date!=='') dbv.DT1=record.Milestone_Delivery_Date;
+            if(record.Output_Delivery_Date!=='') dbv.DT2=record.Output_Delivery_Date;
+            dbv.PUID=0; if(record.Program_uid!=='') dbv.PUID=parseInt(record.Program_uid);
+            dbv.PPID=program_pid;
+        return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

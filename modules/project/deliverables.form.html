@@ -1,0 +1,207 @@
+<section>
+    VmInclude:__COMPONENT__/toolbar/back_save.html
+    <form id=F__ID style='padding:20px'>
+        <table id=tb__ID style='width:100%;'>
+            <colgroup>
+                <col style='width:150px' /> <col />
+                <col style='width:800px' /> <col />
+            </colgroup>
+            <tr>
+                <td>Deliverable ID</td><td><span data-id=Deliverable_ID></span></td>
+            </tr>
+            <tr>
+                <td>Deliverable</td><td><span data-id=Deliverable_Name></span></td>
+            </tr>
+            <tr>
+                <td>Start Date</td><td><span data-id=Start_date></span></td>
+            </tr>
+            <tr>
+                <td>Completion Date</td><td><span data-id=Completion_Date></span></td>
+            </tr>
+        </table>
+        <br>
+        <div>
+            <u style='cursor:pointer' id=add_an_item_a__ID class=c_print>Add a new progress report</u>
+            <table id=grid_item_a__ID></table>
+        </div>
+    </form>
+</section>
+<script>
+    function F__ID(){
+        //----------------------------------
+        VmInclude:__COMPONENT__/grid/form.js
+        VmInclude:__COMPONENT__/grid/grid_item_a.js
+        VmInclude:__COMPONENT__/grid/grid_item_b.js
+        //----------------------------------
+        var update_pid=$vm.module_list['_wappsystem_crc_backoffice_project_deliverables_form'].Updates;
+        //----------------------------------
+        $('#D__ID').on('load',function(){
+            _init();
+            _field_process();
+            //custom_field_process();
+            $('#save__ID').show();
+            if(_save_style=='none') $('#save__ID').hide();
+
+            //-------item a part
+            _item_a_ppid=_db_pid;
+            _item_a_puid=''; if(_records[I].UID!=undefined) _item_a_puid=_records[I].UID;
+            _item_a_set_req(); _item_a_request_data();
+            //-------
+
+            })
+        //----------------------------------
+        _custom_field_process=function(){
+            $('#tb__ID tbody td span').each(function(){
+                var data_id=$(this).attr('data-id');
+                switch(data_id){
+                    case 'Deliverable_ID':
+                        $(this).html(_records[I][data_id]);
+                        break;
+                    case 'Deliverable_Name':
+                        $(this).html(_records[I][data_id]);
+                    break;
+                    case 'Start_date':
+                        $(this).html(_records[I][data_id]);
+                    break;
+                    case 'Completion_Date':
+                        $(this).html(_records[I][data_id]);
+                    break;
+                }
+            })
+        }
+        //----------------------------------
+        _after_submit_form=function(I,res,n,dbv){
+            _item_a_ppid=res.pid; _item_a_puid=res.uid;
+            _item_a_save(_item_a_db_pid,_item_a_ppid,_item_a_puid);
+        }
+        //----------------------------------
+        //item a part
+        var _item_a_db_pid=update_pid;
+        _item_a_fields="Deliverable Status|i1Update_Status,Estimated <br>to completion|i1Estimated_Completion,Update date|i1Update_Date,Justification|i1Justification,Action/ Strategies|i1Action_Strategies,Risk|i1Risk,Impact on other Deliverables|i1Impact_Deliverables,Impact on Output|i1Impact_output,_Remove";
+        //----------------------------------
+        $('#add_an_item_a__ID').on('click',function(){ _item_a_add(); })
+        //----------------------------------
+        _item_a_cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case "i1Update_Status":
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >Yes</option>\
+                    <option >In Progress</option>\
+                    <option >Propose to reschedule</option>\
+                    <option >No</option>\
+                    <option >Cancelled</option>\
+                    </select>\
+                    ";
+                    records[I].vm_custom[field]=true;
+                    td.html(html)
+                    td.find('select').val(records[I][field])
+                    td.find('select').on('input', function(){
+                        set_value($(this).val(),records,I,field);
+                        cal();
+                    });
+                    break;
+                    case "i1Estimated_Completion":
+                        var html="<select style='border:0;''>\
+                        <option value='' >...</option>\
+                        <option >0%</option>\
+                        <option >5%</option>\
+                        <option >10%</option>\
+                        <option >15%</option>\
+                        <option >20%</option>\
+                        <option >25%</option>\
+                        <option >30%</option>\
+                        <option >35%</option>\
+                        <option >40%</option>\
+                        <option >45%</option>\
+                        <option >50%</option>\
+                        <option >55%</option>\
+                        <option >60%</option>\
+                        <option >65%</option>\
+                        <option >70%</option>\
+                        <option >75%</option>\
+                        <option >80%</option>\
+                        <option >85%</option>\
+                        <option >90%</option>\
+                        <option >95%</option>\
+                        <option >100%</option>\
+                        </select>\
+                        ";
+                        records[I].vm_custom[field]=true;
+                        td.html(html)
+                        td.find('select').val(records[I][field])
+                        td.find('select').on('input', function(){
+                            set_value($(this).val(),records,I,field);
+                            cal();
+                        });
+                    break;
+                case "i1Update_Date":
+                records[I].vm_custom[field]=true;
+                td.html('<input style="border:0; width:80px" />')
+                td.find('input').val(records[I][field])
+                td.find('input').datepicker({dateFormat:'dd/mm/yy',changeMonth:true, changeYear:true,onClose:function(dateText) {
+                    set_value(dateText,records,I,field);
+                    cal();
+                }});
+                    break;
+            }
+        }
+        //----------------------------------
+        _item_a_after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+            }
+        }
+        //----------------------------------
+        _item_a_after_remove=function(){
+            cal();
+        }
+        //----------------------------------
+        _item_a_set_req=function(){
+            var sql="select ID,Information from [TABLE-"+_item_a_db_pid+"] where ppid="+_item_a_ppid+" and puid="+_item_a_puid+" order by uid desc";
+            _item_a_req={cmd:'query_records',sql:sql}
+            if(_item_a_puid=='') _item_a_req=''
+        }
+        //-------------------------------------
+        _item_a_before_submit=function(record,dbv){
+            return true;
+        }
+        //----------------------------------
+
+
+        //----------------------------------
+        var cal=function(){
+            _records[I].Estimated_Completion=_item_a_records[0].i1Estimated_Completion;
+            _records[I].Update_Status=_item_a_records[0].i1Update_Status;
+            _records[I].Update_Date=_item_a_records[0].i1Update_Date;
+            _field_process();
+            _item_a_render();
+        }
+        //----------------------------------
+
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/toolbar/toolbar.css
+    VmInclude:__COMPONENT__/grid/form.css
+    VmInclude:__COMPONENT__/grid/grid_item_a.css
+    VmInclude:__COMPONENT__/grid/grid_item_b.css
+    #tb__ID{
+        border: 0 solid #aaa;
+    }
+    #tb__ID td{
+        border: 0 solid #aaa;
+    }
+    #tb__ID td input{
+        border: 0 solid #aaa;
+    }
+    #summary__ID,#balance__ID{
+        padding-top:3px;
+        border: 0 solid #aaa;
+        width:300px;
+        float:right;
+        border-collapse: collapse;
+    }
+    #summary__ID td,#balance__ID td{
+        border: 0px solid #aaa;
+    }
+</style>

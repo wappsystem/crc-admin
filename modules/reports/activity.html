@@ -1,0 +1,70 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a>
+        <span class=tab__ID></span>
+        <span>Date:</span> <input type=text id=t1__ID placeholder="" style='width:80px;padding-left:3px' />
+        <a id=aquery__ID >Query</a>
+        <a id=export__ID >Export</a>
+    	<span class=tab__ID></span><b>Activity Add/Modify Tables after selected date</b> <span id=alloc_time__ID></span>
+    </div>
+    <table id=grid__ID></table>
+</section>
+<script>
+    function F__ID(){
+        //------------------------
+        VmInclude:__COMPONENT__/toolbar/back.js
+        VmInclude:__COMPONENT__/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //------------------------
+        var _fields="Table_Name";//,Start_date,Completion_Date";
+        _fields+=",Created By|Author,Creation Date|DateTime,Modified By|MAuthor,Modification Date|Modified";
+        //-------------------------------------
+        $('#aquery__ID').on('click',function(){ _set_req(); _request_data(); })
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            var today = new Date();
+            today.setDate(today.getDate()-90);
+            $('#t1__ID').datepicker({dateFormat:'dd/mm/yy'});
+            $('#t1__ID').val($.datepicker.formatDate('dd/mm/yy', today));
+        })
+        //-------------------------------------
+        _set_req=_set_req_export=function(){
+            //-------------------------------------
+            //var sql="select MAuthor,Modified,Author,DateTime,Information,a=Modified  from [TABLE-"+_db_pid+"] where (Modified>=@T1 or DateTime>=@T1) and ((MAuthor<>'alertnesscrc' and MAuthor<>'jennteh') or MAuthor IS NULL) order by a desc";
+            var sql="with tb1 as (select Table_Name='Project Milestone',MAuthor,Modified,Author,DateTime  from [TABLE-20003942] where (Modified>=@T1 or DateTime>=@T1)  and ((MAuthor<>'alertnesscrc' and MAuthor<>'jennteh') or MAuthor IS NULL)  ) "
+            sql+=",tb2 as (select Table_Name='Project Milestone Update',MAuthor,Modified,Author,DateTime  from [TABLE-20009286] where (Modified>=@T1 or DateTime>=@T1)  and ((Author<>'alertnesscrc' and Author<>'jennteh'))  ) "
+            sql+=",tb3 as (select Table_Name='Project Deliverables',MAuthor,Modified,Author,DateTime  from [TABLE-20009287] where (Modified>=@T1 or DateTime>=@T1)  and ((MAuthor<>'alertnesscrc' and MAuthor<>'jennteh') or MAuthor IS NULL)  ) "
+            sql+=",tb4 as (select Table_Name='Project',MAuthor,Modified,Author,DateTime from [TABLE-20003921] where (Modified>=@T1 or DateTime>=@T1)  and ((MAuthor<>'alertnesscrc' and MAuthor<>'jennteh') or MAuthor IS NULL)  ) "
+            sql+=",tb5 as (select Table_Name='Commonwealth Milestones',MAuthor,Modified,Author,DateTime from [TABLE-20009547] where (Modified>=@T1 or DateTime>=@T1) and ((MAuthor<>'alertnesscrc' and MAuthor<>'jennteh') or MAuthor IS NULL) ) "
+            sql+=",tb6 as (select Table_Name='Research Programs',MAuthor,Modified,Author,DateTime from [TABLE-20004861] where (Modified>=@T1 or DateTime>=@T1) and ((MAuthor<>'alertnesscrc' and MAuthor<>'jennteh') or MAuthor IS NULL)  ) "
+            sql+=",tb7 as (select Table_Name='Support queries',MAuthor,Modified,Author,DateTime from [TABLE-20010704] where (Modified>=@T1 or DateTime>=@T1) and ((Author<>'alertnesscrc' and Author<>'jennteh'))  ) "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb1 "
+            sql+="UNION "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb2 "
+            sql+="UNION "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb3 "
+            sql+="UNION "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb4 "
+            sql+="UNION "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb5 "
+            sql+="UNION "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb6 "
+            sql+="UNION "
+            sql+="select Table_Name,MAuthor,Modified,Author,DateTime from tb7 order by Modified desc"
+            //sql+="order by a desc";
+            //-------------------------------------
+            _req={cmd:'query_records',sql:sql,t1:$('#t1__ID').val(),};
+            //-------------------------------------
+        }
+        //-------------------------------------
+        _data_process=function(){
+            for(var i=0;i<_records.length;i++){
+                _records[i].Modified=_records[i].Modified.substring(0,10);
+            }
+        }
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

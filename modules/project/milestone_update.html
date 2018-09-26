@@ -1,0 +1,105 @@
+<section>
+    VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Form";
+        _fields+=",Milestone No|PUID,Milestone_Status,Estimated <br>to completion|Estimated_Completion,Justification,Action/ Strategies|Action_Strategies,Risk,Impact on other Milestones|Impact_Milestones,Impact on Output|Impact_output";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var parent_pid=$vm.module_list['wappsystem_crc_backoffice_project_milestone'].table_id;
+        //-------------------------------------
+        //$("#title__ID").text('Milestone Progress');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){  _set_req(); _request_data(); $("#title__ID").text('Milestone Progress ('+$vm.vm['__ID'].op.ms_id+')');})
+        $('#D__ID').on('back',function(){  _set_req(); _request_data(); $("#title__ID").text('Milestone Progress ('+$vm.vm['__ID'].op.ms_id+')');})
+        //$('#query__ID').on('click',function(){ _set_req(); _request_data(); })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'PUID':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case 'Milestone_Status':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >Yes</option>\
+                    <option >In Progress</option>\
+                    <option >No</option>\
+                    <option >Superseded</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Estimated_Completion':
+                    if(source=="grid") td.css("text-align","right").css('white-space','nowrap');
+                    if(records[I][field]==="") records[I][field]='0';
+                    var ec=parseFloat(records[I][field]).toFixed(0);
+                    if(ec>100)ec=100
+                    td.html(ec );
+                break;
+            }
+        }
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            $('#multi__ID').show();
+            if($vm.vm['__ID'].op.new!==undefined || $vm.vm['__ID'].op.sql_where!==undefined){
+                //$('#multi__ID').hide();
+            }
+            //-------------------
+            var sql="with tb as (select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1] )";
+            sql+="select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]";
+            //-------------------
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                alert(sql_where)
+                sql=sql.replace('RowNum between @I6 and @I7',sql_where);
+                sql_n+=" where "+sql_where;
+            }
+            //-------------------
+            _req={cmd:'query_records',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+        var _set_req_export=function(){
+            var sql="with tb as (select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"] )";
+            sql+="select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb";
+            _set_from_to();
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                sql=sql+' where '+sql_where;
+            }
+            if(_from!='0' && _to!='0' ) sql+=" and RowNum between @I6 and @I7 ";
+            _req={cmd:'query_records',sql:sql,i6:_from,i7:_to}
+        }
+        //-------------------------------------
+        _after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Estimated_Completion':
+                    _render(I);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            dbv.PPID=parent_pid;
+    		    dbv.PUID=$vm.vm['__ID'].op.puid;
+            dbv.S1=record.Milestone_Status;
+            dbv.S2=record.Estimated_Completion;
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+</style>

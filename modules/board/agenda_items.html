@@ -1,0 +1,76 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="_Form,Order,Item Number|Item_number,Item Title|Item_title,Action,Board Paper|DocBoardPaper,Reference Documents|DocReference";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete";
+        //-------------------------------------
+        var action_pid=$vm.module_list['wappsystem_crc_backoffice_board_construct_agenda_items'].action_type;
+        //$("#title__ID").text('Board Meeting | Agenda Items');
+        //-------------------------------------
+        $('#D__ID').on('load',function(){$("#title__ID").text("Board Meeting | Agenda "+($vm.vm['__ID'].op.meeting_date).replace(/_/g,' ')); _set_req(); _request_data(); })
+        $('#D__ID').on('back',function(){ _set_req(); _request_data(); })
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            $('#multi__ID').show();
+            if($vm.vm['__ID'].op.new!==undefined || $vm.vm['__ID'].op.sql_where!==undefined){
+                $('#multi__ID').hide();
+            }
+            //-------------------
+            var sql="with tb as (select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum=row_number() over (order by ID DESC) from [TABLE-"+_db_pid+"-@S1] )";
+            sql+="select Information,ID,PUID,UID,DateTime,Author,Modified,MAuthor,RowNum from tb where RowNum between @I6 and @I7";
+            var sql_n="select count(ID) from [TABLE-"+_db_pid+"-@S1]";
+            //-------------------
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                var sql_where=$vm.vm['__ID'].op.sql_where;
+                sql=sql.replace('RowNum between @I6 and @I7',sql_where);
+                sql_n+=" where "+sql_where;
+            }
+            //-------------------
+            _req={cmd:'query_records',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+              case 'DocBoardPaper':
+              case 'DocReference':
+                  VmInclude:__COMPONENT__/grid/field_file.js
+                  break;
+              case 'Action':
+                  var sql="with tb as (select name=@('Action'),value2=uid from [TABLE-"+action_pid+"])";
+                  sql+=" select top 10 name,value=name,value2 from tb where Name like '%'+@S1+'%' ";
+                  VmInclude:__COMPONENT__/grid/field_auto.js
+              break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            dbv.PUID=$vm.vm['__ID'].op.puid;
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+VmInclude:__COMPONENT__/grid/grid.css
+#grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

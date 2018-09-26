@@ -1,0 +1,101 @@
+<div id=D__ID>
+    <div>
+        <div id=toolbar__ID>
+            <!--<a id=back__ID>Back</a><span class=tab__ID></span>-->
+            <span id=nav_link__ID></span>
+        </div>
+        <div style='clear:left;'>
+          <div class='nav__ID' >
+              <span><b>CRC Board Meetings</b></span>
+               <ul>
+                 <li data-name=wappsystem_crc_backoffice_board_agenda>Agendas with attachments</li>
+              </ul>
+              <br><span><b>Setup</b></span>
+              <ul>
+                    <li data-name=wappsystem_crc_backoffice_board_construct_agenda>Construct Agendas</li>
+                    <li data-name=wappsystem_crc_backoffice_board_action_type>Action Type</li>
+              </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        //---------------------------------------------
+        /*
+        var L=$vm.module_list,B=$vm.hosting_path+'/wappsystem/crc-backoffice';
+
+        //HR
+        L.wappsystem_crc_backoffice_board_agenda= {table_id:'20000466',url:B+'/modules/board/agendas_nav.html'};
+        L.wappsystem_crc_backoffice_board_agendas= {table_id:'20000455',url:B+'/modules/board/agenda.html'};
+        L.wappsystem_crc_backoffice_board_construct_agenda={table_id:'20000466',url:B+'/modules/board/construct_agenda.html'};
+        L.wappsystem_crc_backoffice_board_construct_agenda_items={table_id:'20000455',url:B+'/modules/board/agenda_items.html',action_type:'20000456'};
+
+        L.wappsystem_crc_backoffice_board_action_type= {table_id:'20000456',url:B+'/modules/board/action_type.html'};
+        */
+        //---------------------------------------------
+        function F__ID(){
+            /*
+        	var redirect_done=0;
+            //---------------------------------------------
+            var content_slot=$vm.root_layout_content_slot;
+            Vm Include:__COMPONENT__/navigation/navigation.js
+            Vm Include:__COMPONENT__/style/ease-in-out.js
+            //---------------------------------------------
+            $('#D__ID').on('load',function(){
+                _nav_name='CRC Board Meeting';
+                _set_nav_link();
+                _set_permissions();
+        		var query = window.location.search.substring(1);
+        		if(query=='redirect=crc_board' && redirect_done==0){
+        			redirect_done=1;
+        			$vm.load_module_by_name('wappsystem_crc_backoffice_board_agenda',$vm.root_layout_content_slot,{});
+        		}
+            });
+            //---------------------------------------------
+            */
+            $('.nav__ID li').on('click',function(e){
+                var m=$(this).attr('data-name');
+                if(m!=undefined){
+                    e.preventDefault();
+                    $vm.load_module_v2(m,'',{});
+                }
+            })
+        }
+    </script>
+    <style>
+        VmInclude:__COMPONENT__/navigation/navigation.css
+        #D__ID{
+            background: url("__COMPONENT__/image/texture.png");
+        }
+        #toolbar__ID *{
+            margin:0;
+            padding:0;
+            vertical-align:middle;
+        }
+        #toolbar__ID{
+            padding:6px;
+            background-color:#ddd;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size:11pt;
+            border-bottom: 1px solid #aaa;
+        }
+        #toolbar__ID a{
+            background-color:#697b7b;
+            border:0px solid #18ab29;
+            display:inline-block;
+            cursor:pointer;
+            color:#ffffff;
+            font: 9pt/30px Arial;
+            padding-left:15px;
+            padding-right:15px;
+            text-decoration:none;
+            text-shadow:1px 1px 0px #2f6627;
+            -moz-border-radius:8px;
+            -webkit-border-radius:8px;
+            border-radius:8px;
+            transition: all 0.2s ease-in-out;
+        }
+        #toolbar__ID a:hover {
+          background-color:#525959;
+        }
+    </style>
+</div>

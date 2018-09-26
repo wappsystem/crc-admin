@@ -1,0 +1,134 @@
+<section>
+      VmInclude:__HOST__/common-code/grid/grid.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__HOST__/common-code/grid/grid.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        VmInclude:__HOST__/common-code/lockout.js
+        //-------------------------------------
+        _fields="_Form,_Hidden|UID,Participant|Short_form_name,Full Name|Name,Staff List|_Staff,Project List|_Project,ABN|ABN,Address|Address,Primary Contact|Primary_Contact,Primary Login Name|Primary_login,Primary Contact Email|Primary_Email,Secondary Contact|Secondary_Contact,Secondary Login Name|Secondary_login,Secondary Contact Email|Secondary_Email,Organisation Type|Organisation_Type,Sub Type|Sub_Type,SME&#44; International or Individual|SME_int_ind,Is End User|End_User,Participant Type|Participant_Type,Cash|Cash_Contributer,In Kind Staff|Inkind_Staff_Contributer,In Kind Non-Staff|Inkind_Non_Staff_Contributer";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor,_Delete,_Hidden|Client_uid";
+        //-------------------------------------
+        _fields_e="Participant|Short_form_name,Full Name|Name,ABN|ABN,Address|Address,Primary Contact|Primary_Contact,Primary Login Name|Primary_login,Primary Contact Email|Primary_Email,Secondary Contact|Secondary_Contact,Secondary Login Name|Secondary_login,Secondary Contact Email|Secondary_Email,Organisation Type|Organisation_Type,Sub Type|Sub_Type,SME&#44; International or Individual|SME_int_ind,Is End User|End_User,Participant Type|Participant_Type,Cash|Cash_Contributer,In Kind Staff|Inkind_Staff_Contributer,In Kind Non-Staff|Inkind_Non_Staff_Contributer";
+        //-------------------------------------
+        $("#title__ID").text('Participant');
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'UID':
+                    records[I].vm_readonly[field]=true;
+                break;
+                case '_Staff':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].UID===undefined) return;
+                    var html="<u style='cursor:pointer'>Staff</u>";
+                    td.html(html);
+                    td.find('u').on('click',function(){
+                        $vm.load_module_by_name('wappsystem_crc_backoffice_staff',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID,participant:records[I].Name});
+                    })
+                break;
+                case '_Project':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].UID===undefined) return;
+                    var html="<u style='cursor:pointer'>Project</u>";
+                    td.html(html);
+                    td.find('u').on('click',function(){
+                        $vm.load_module_by_name('wappsystem_crc_backoffice_participant_project',$vm.root_layout_content_slot,{sql_where:'puid='+records[I].UID,puid:records[I].UID,participant:records[I].Name});
+                    })
+                break;
+                case 'Organisation_Type':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option value='State Government' >State Government</option>\
+                    <option value='Industry Private' >Industry Private</option>\
+                    <option value='University' >University</option>\
+                    <option value='Australian Government' >Australian Government</option>\
+                    <option value='Other' >Other</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'SME_int_ind':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option value='SME' >SME</option>\
+                    <option value='International' >International</option>\
+                    <option value='Individual' >Individual</option>\
+                    <option value='N/A' >N/A</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'End_User':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option >Yes</option>\
+                    <option >No</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Participant_Type':
+                    var html="<select style='border:0;''>\
+                    <option value='' >...</option>\
+                    <option value='Essential' >Essential</option>\
+                    <option value='Third Party' >Third Party</option>\
+                    <option value='Management' >Management</option>\
+                    <option value='Other' >Other</option>\
+                    </select>\
+                    ";
+                    VmInclude:__COMPONENT__/grid/field_select.js
+                break;
+                case 'Cash_Contributer':
+                case 'Inkind_Non_Staff_Contributer':
+                case 'Inkind_Staff_Contributer':
+                    td.html('<input type=checkbox />');
+                    VmInclude:__COMPONENT__/grid/field_checkbox.js
+                break;
+            }
+        }
+        //-------------------------------------
+        _data_process=function(){
+/*            for(var i=0;i<_records.length;i++){
+                if(_records[i].Total_Payment===undefined) _records[i].Total_Payment=0;
+                if(_records[i].Total_Amount===undefined) _records[i].Total_Amount=0;
+                _records[i].Balance=parseFloat(_records[i].Total_Payment)-parseFloat(_records[i].Total_Amount);
+                _records[i].Invoice_Number=_records[i].UID;
+            }
+*/        };
+        //-------------------------------------
+        _new_pre_data_process=function(){ //set issue and due date
+/*            _records[0].Issue_Date=$vm.date_to_string_dmy($vm.date_today());
+            _records[0].Due_Date=$vm.date_to_string_dmy($vm.date_today());
+            _records[0].GST_Amount=0;
+            _records[0].Total_Amount=0;
+            _records[0].Total_Payment=0;
+            _records[0].Balance=0;
+*/        };
+        //-------------------------------------
+        _before_submit=function(record,dbv){ //set client uid as puid
+/*            if(record.Client_uid!==undefined) dbv.PUID=record.Client_uid;
+            return true;
+*/        };
+        //-------------------------------------
+        $('#D__ID').on('load',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        $('#D__ID').on('back',function(){ if(check_permission()=='allow'){ _set_req(); _request_data();} })
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.css
+    #grid__ID td {white-space: pre-wrap;}
+    .ui-autocomplete.ui-menu{
+        font-size:12px;
+        background:#ddd;
+    }
+    .ui-autocomplete li:hover{
+        color:White;
+        background:#96B202;
+        font-weight:normal;
+        outline:none;
+    }
+</style>

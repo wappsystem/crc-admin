@@ -1,0 +1,62 @@
+<section><div style='background:#ddd'><span id=title__ID></span></div>
+    VmInclude:__COMPONENT__/frame/excel_v2.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__COMPONENT__/frame/excel_v2.js
+        VmInclude:__COMPONENT__/style/ease-in-out.js
+        //-------------------------------------
+        _fields="Hidden|Participant_uid,Participant,Financial_Year,Quarter,Staff Inkind Contribution Locked|Locked";
+        //_fields+=",Submit Date|DateTime,Submitted by|Author,Modified Date|Modified,Modified by|MAuthor";
+        //-------------------------------------
+        var participant_pid='';
+        //-------------------------------------
+        _table_process=function(table){
+            table.Participant={type: 'autocomplete',trimDropdown:false,source:function (query, process){
+                var sqlB="with tb as (select Value=UID,Item=@('Short_form_name') from [FORM-"+participant_pid+"])";
+                sqlB+=" select top 10 Item,Value from tb where Item like '%'+@S1+'%' ";
+                $vm.read_record_auto({query:query,process:process,sql:sqlB,minLength:0,callback:function(nv){auto_uid=nv;}});
+            }};
+            table.Financial_Year={type:'dropdown',source: ['FY1314','FY1415','FY1516','FY1617','FY1718','FY1819','FY1920']};
+            table.Quarter={type:'dropdown',source: ['1','2','3','4']};
+            table.Locked={type:'checkbox'};
+        }
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            participant_pid=$vm.module_list[$vm.vm['__ID'].name][4];
+            _set_req(); _request_data();  })
+        //-------------------------------------
+        _pre_data_process=function (){
+            for(var i=0;i<_records.length;i++){
+                _records[i].Locked=_to_true_and_false(_records[i].Locked);
+            }
+            $("#title__ID").text('Lock Staff Inkind Contribution');
+        };
+        //-------------------------------------
+        _after_change=function(record,column){
+            var item="";
+            if(column==='Participant'){
+                record.Participant_uid=auto_uid[record.Participant];
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            if(record.Financial_Year!=='') dbv.S1=record.Financial_Year;
+            if(record.Quarter!=='') dbv.S2=record.Quarter;
+            if(record.Participant!=='') dbv.S3=record.Participant;
+            if(record.Participant_uid!=='') dbv.PUID=record.Participant_uid;
+            if(record.Locked===true) dbv.B1='1'; else dbv.B1='0';
+            return true;
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/style/default.css
+    #title__ID{
+        background-color:#ddd;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size:9pt;
+    }
+</style>

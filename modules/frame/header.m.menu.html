@@ -1,0 +1,121 @@
+<div id=menu_button__ID><span></span></div>
+<nav id=m_nav__ID>
+    <ul id=main_ul__ID>
+        <li data-name=home id=home_page>Home</li>
+        <li data-name=navigation_data_entry>Project Management Data Entry</li>
+        <li data-name=navigation_reports>Project Management Reports</li>
+        <li data-name=navigation_board>Board Meetings</li>
+        <li id=m_signin__ID data-b='1'>Sign In</li>
+        <li id=m_signout__ID data-b='2'>Sign Out</li>
+    </ul>
+</nav>
+<script>
+    $("#menu_button__ID").on('click', function(){
+        $('#header__ID').css('opacity','1');
+        $('#content_slot__ID').css('opacity','1');
+        $vm.mobile=1;
+        $(this).toggleClass('menu-opened');
+        var mainmenu = $('#main_ul__ID');
+        if (mainmenu.hasClass('open')) {
+            mainmenu.hide().removeClass('open');
+        }
+        else{
+            mainmenu.show().addClass('open');
+        }
+    });
+</script>
+<style>
+    @media all and (max-width: 768px), only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 1024px), only screen and (min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min-resolution: 192dpi) and (max-width: 1024px), only screen and (min-resolution: 2dppx) and (max-width: 1024px) {
+        #menu_button__ID {
+            display:block;
+            color:#000;
+        }
+        #menu_button__ID span {
+            position: absolute;
+            top: 12px;
+            left: 17px;
+            font-size: 24px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        #menu_button__ID:after {
+          position: absolute;
+          top: 32px;
+          right: 27px;
+          display: block;
+          height: 4px;
+          width: 25px;
+          border-top: 3px solid #000;
+          border-bottom: 3px solid #000;
+          content: '';
+          cursor:pointer;
+        }
+        #menu_button__ID:before {
+          position: absolute;
+          top: 25px;
+          right: 27px;
+          display: block;
+          height: 3px;
+          width: 25px;
+          background: #000;
+          content: '';
+          cursor:pointer;
+        }
+        #menu_button__ID.menu-opened:after {
+          top: 33px;
+          border: 0;
+          height: 3px;
+          width: 25px;
+          background: #000;
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+          cursor:pointer;
+        }
+        #menu_button__ID.menu-opened:before {
+          top: 33px;
+          background: #000;
+          width: 25px;
+          -webkit-transform: rotate(-45deg);
+          -moz-transform: rotate(-45deg);
+          -ms-transform: rotate(-45deg);
+          -o-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          cursor:pointer;
+        }
+        #m_nav__ID{
+            padding: 0 0 0 0;
+            margin:0;
+            float: left;
+            opacity: 1;
+            /*top: 0px;*/
+            left: 0px;
+            width:100%;
+        }
+        #m_nav__ID ul{
+            float:none;
+            margin-left:0;
+            padding-left:0;
+            background: #333333;
+        }
+        #m_nav__ID ul>li{
+            background: #333333;
+            color:#ffffff;
+            margin-left:0;
+            padding-left:30px;
+            width:100%;
+            font-size:24px;
+            line-height: 36px;
+            border-top: 1px solid rgba(120, 120, 120, 0.2);
+            cursor:pointer;
+        }
+        #m_nav__ID>ul>li:hover{
+            color:#f00;
+        }
+        #main_ul__ID{
+            display:none;
+        }
+    }
+</style>
